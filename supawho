@@ -1,15 +1,15 @@
 #!/bin/bash
-# supabase_login - Manage multiple Supabase accounts securely via macOS Keychain
+# supawho - Manage multiple Supabase accounts securely via macOS Keychain
 #
 # Usage:
-#   supabase_login              → Interactive account selection + login
-#   supabase_login add <name> <token>  → Save account token to Keychain
-#   supabase_login remove <name>       → Remove account from Keychain
-#   supabase_login list                → List saved accounts
-#   supabase_login use <name>          → Login with specific account
+#   supawho              → Interactive account selection + login
+#   supawho add <name> <token>  → Save account token to Keychain
+#   supawho remove <name>       → Remove account from Keychain
+#   supawho list                → List saved accounts
+#   supawho use <name>          → Login with specific account
 #
 # Install globally:
-#   cp supabase_login /usr/local/bin/ && chmod +x /usr/local/bin/supabase_login
+#   cp supawho /usr/local/bin/ && chmod +x /usr/local/bin/supawho
 
 KEYCHAIN_SERVICE="supabase-cli-accounts"
 KEYCHAIN_INDEX_KEY="_account_list"
@@ -41,8 +41,8 @@ cmd_add() {
   local token="$2"
 
   if [[ -z "$name" || -z "$token" ]]; then
-    echo "Usage: supabase_login add <name> <token>"
-    echo "Example: supabase_login add ermanno sbp_xxx..."
+    echo "Usage: supawho add <name> <token>"
+    echo "Example: supawho add ermanno sbp_xxx..."
     exit 1
   fi
 
@@ -67,7 +67,7 @@ cmd_remove() {
   local name="$1"
 
   if [[ -z "$name" ]]; then
-    echo "Usage: supabase_login remove <name>"
+    echo "Usage: supawho remove <name>"
     exit 1
   fi
 
@@ -88,7 +88,7 @@ cmd_list() {
 
   if [[ -z "$list" ]]; then
     echo "No accounts saved. Add one with:"
-    echo "  supabase_login add <name> <token>"
+    echo "  supawho add <name> <token>"
     exit 0
   fi
 
@@ -102,7 +102,7 @@ cmd_use() {
   local name="$1"
 
   if [[ -z "$name" ]]; then
-    echo "Usage: supabase_login use <name>"
+    echo "Usage: supawho use <name>"
     exit 1
   fi
 
@@ -110,7 +110,7 @@ cmd_use() {
   token=$(get_token "$name")
 
   if [[ -z "$token" ]]; then
-    echo "Account '$name' not found. Run 'supabase_login list' to see saved accounts."
+    echo "Account '$name' not found. Run 'supawho list' to see saved accounts."
     exit 1
   fi
 
@@ -125,7 +125,7 @@ cmd_interactive() {
 
   if [[ -z "$list" ]]; then
     echo "No accounts saved. Add one with:"
-    echo "  supabase_login add <name> <token>"
+    echo "  supawho add <name> <token>"
     exit 0
   fi
 
@@ -166,14 +166,14 @@ case "${1:-}" in
     cmd_use "$2"
     ;;
   help|--help|-h)
-    echo "supabase_login - Manage multiple Supabase accounts"
+    echo "supawho - Manage multiple Supabase accounts"
     echo ""
     echo "Usage:"
-    echo "  supabase_login                       Interactive account selection"
-    echo "  supabase_login add <name> <token>     Save account to Keychain"
-    echo "  supabase_login remove <name>          Remove account"
-    echo "  supabase_login list                   List saved accounts"
-    echo "  supabase_login use <name>             Login with specific account"
+    echo "  supawho                       Interactive account selection"
+    echo "  supawho add <name> <token>     Save account to Keychain"
+    echo "  supawho remove <name>          Remove account"
+    echo "  supawho list                   List saved accounts"
+    echo "  supawho use <name>             Login with specific account"
     echo ""
     echo "Tokens are stored securely in macOS Keychain."
     ;;
@@ -182,7 +182,7 @@ case "${1:-}" in
     ;;
   *)
     echo "Unknown command: $1"
-    echo "Run 'supabase_login help' for usage."
+    echo "Run 'supawho help' for usage."
     exit 1
     ;;
 esac

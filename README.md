@@ -1,4 +1,4 @@
-# supabase_login
+# supawho
 
 CLI tool to manage multiple Supabase accounts. Tokens are stored securely in **macOS Keychain**.
 
@@ -9,19 +9,19 @@ CLI tool to manage multiple Supabase accounts. Tokens are stored securely in **m
 1. Clone the repository:
 
 ```bash
-git clone git@github.com:EliaTolin/supabase_login.git
+git clone git@github.com:EliaTolin/supawho.git
 ```
 
 2. Make the script executable:
 
 ```bash
-chmod +x supabase_login/supabase_login
+chmod +x supawho/supawho
 ```
 
 3. Add an alias to your shell config (`~/.zshrc` or `~/.bashrc`):
 
 ```bash
-echo 'alias supabase_login="/path/to/supabase_login/supabase_login"' >> ~/.zshrc
+echo 'alias supawho="/path/to/supawho/supawho"' >> ~/.zshrc
 ```
 
 4. Reload the shell:
@@ -37,23 +37,23 @@ source ~/.zshrc
 Generate an access token at [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens), then:
 
 ```bash
-supabase_login add <name> <token>
+supawho add <name> <token>
 ```
 
 ```bash
-supabase_login add myproject sbp_xxx...
+supawho add myproject sbp_xxx...
 ```
 
 ### List saved accounts
 
 ```bash
-supabase_login list
+supawho list
 ```
 
 ### Login with a specific account
 
 ```bash
-supabase_login use <name>
+supawho use <name>
 ```
 
 ### Interactive login
@@ -61,7 +61,7 @@ supabase_login use <name>
 Run without arguments to select an account interactively:
 
 ```bash
-supabase_login
+supawho
 ```
 
 ```
@@ -76,7 +76,7 @@ Enter number (1-2):
 ### Remove an account
 
 ```bash
-supabase_login remove <name>
+supawho remove <name>
 ```
 
 ## Requirements
