@@ -11,6 +11,8 @@
 # Install globally:
 #   cp supawho /usr/local/bin/ && chmod +x /usr/local/bin/supawho
 
+VERSION="1.0.0"
+
 show_banner() {
   local green=$'\033[1;32m'
   local reset=$'\033[0m'
@@ -179,6 +181,9 @@ case "${1:-}" in
   use)
     cmd_use "$2"
     ;;
+  version|--version|-v)
+    echo "supawho ${VERSION}"
+    ;;
   help|--help|-h)
     show_banner
     echo "Usage:"
@@ -187,6 +192,7 @@ case "${1:-}" in
     echo "  supawho remove <name>          Remove account"
     echo "  supawho list                   List saved accounts"
     echo "  supawho use <name>             Login with specific account"
+    echo "  supawho version                Show version"
     echo ""
     echo "Tokens are stored securely in macOS Keychain."
     ;;
