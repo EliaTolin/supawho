@@ -11,7 +11,7 @@
 # Install globally:
 #   cp supawho /usr/local/bin/ && chmod +x /usr/local/bin/supawho
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 
 show_banner() {
   local green=$'\033[1;32m'
