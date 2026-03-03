@@ -138,9 +138,28 @@ cmd_interactive() {
   local list
   list=$(get_account_list)
 
+  show_banner
+
   if [[ -z "$list" ]]; then
-    echo "No accounts saved. Add one with:"
-    echo "  supawho add <name> <token>"
+    echo "  No accounts found. Let's add your first one!"
+    echo ""
+    read -rp "  Account name (e.g. myproject): " name
+    if [[ -z "$name" ]]; then
+      echo "  Aborted."
+      exit 1
+    fi
+    read -rp "  Access token (sbp_...): " token
+    if [[ -z "$token" ]]; then
+      echo "  Aborted."
+      exit 1
+    fi
+    echo ""
+    cmd_add "$name" "$token"
+    echo ""
+    read -rp "  Login now as '$name'? [Y/n] " confirm
+    if [[ -z "$confirm" || "$confirm" =~ ^[Yy]$ ]]; then
+      cmd_use "$name"
+    fi
     exit 0
   fi
 
@@ -148,7 +167,6 @@ cmd_interactive() {
   local accounts=()
   IFS=',' read -ra accounts <<< "$list"
 
-  show_banner
   echo "Select an account:"
   echo ""
   for i in "${!accounts[@]}"; do

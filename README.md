@@ -1,8 +1,15 @@
 <div align="center">
 
-<img src="image.png" alt="supawho" width="400" />
-
-<br>
+<table>
+<tr>
+<td align="center" width="300">
+<img src="image.png" alt="supawho" width="280" />
+</td>
+<td align="center" width="400">
+<img src="demo.png" alt="demo" width="380" />
+</td>
+</tr>
+</table>
 
 Switch between multiple **Supabase** accounts in seconds.<br>
 Tokens are stored securely in **macOS Keychain**.
