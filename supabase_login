@@ -1,0 +1,188 @@
+#!/bin/bash
+# supabase_login - Manage multiple Supabase accounts securely via macOS Keychain
+#
+# Usage:
+#   supabase_login              → Interactive account selection + login
+#   supabase_login add <name> <token>  → Save account token to Keychain
+#   supabase_login remove <name>       → Remove account from Keychain
+#   supabase_login list                → List saved accounts
+#   supabase_login use <name>          → Login with specific account
+#
+# Install globally:
+#   cp supabase_login /usr/local/bin/ && chmod +x /usr/local/bin/supabase_login
+
+KEYCHAIN_SERVICE="supabase-cli-accounts"
+KEYCHAIN_INDEX_KEY="_account_list"
+
+# --- Helpers ---
+
+get_account_list() {
+  local list
+  list=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_INDEX_KEY" -w 2>/dev/null)
+  echo "$list"
+}
+
+save_account_list() {
+  local list="$1"
+  # Delete old entry if exists
+  security delete-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_INDEX_KEY" 2>/dev/null
+  security add-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_INDEX_KEY" -w "$list"
+}
+
+get_token() {
+  local name="$1"
+  security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$name" -w 2>/dev/null
+}
+
+# --- Commands ---
+
+cmd_add() {
+  local name="$1"
+  local token="$2"
+
+  if [[ -z "$name" || -z "$token" ]]; then
+    echo "Usage: supabase_login add <name> <token>"
+    echo "Example: supabase_login add ermanno sbp_xxx..."
+    exit 1
+  fi
+
+  # Save token to Keychain
+  security delete-generic-password -s "$KEYCHAIN_SERVICE" -a "$name" 2>/dev/null
+  security add-generic-password -s "$KEYCHAIN_SERVICE" -a "$name" -w "$token"
+
+  # Update account list
+  local list
+  list=$(get_account_list)
+  if [[ -z "$list" ]]; then
+    list="$name"
+  elif ! echo "$list" | tr ',' '\n' | grep -qx "$name"; then
+    list="$list,$name"
+  fi
+  save_account_list "$list"
+
+  echo "Account '$name' saved to Keychain."
+}
+
+cmd_remove() {
+  local name="$1"
+
+  if [[ -z "$name" ]]; then
+    echo "Usage: supabase_login remove <name>"
+    exit 1
+  fi
+
+  security delete-generic-password -s "$KEYCHAIN_SERVICE" -a "$name" 2>/dev/null
+
+  # Update account list
+  local list
+  list=$(get_account_list)
+  list=$(echo "$list" | tr ',' '\n' | grep -vx "$name" | paste -sd ',' -)
+  save_account_list "$list"
+
+  echo "Account '$name' removed."
+}
+
+cmd_list() {
+  local list
+  list=$(get_account_list)
+
+  if [[ -z "$list" ]]; then
+    echo "No accounts saved. Add one with:"
+    echo "  supabase_login add <name> <token>"
+    exit 0
+  fi
+
+  echo "Saved accounts:"
+  echo "$list" | tr ',' '\n' | while read -r name; do
+    echo "  - $name"
+  done
+}
+
+cmd_use() {
+  local name="$1"
+
+  if [[ -z "$name" ]]; then
+    echo "Usage: supabase_login use <name>"
+    exit 1
+  fi
+
+  local token
+  token=$(get_token "$name")
+
+  if [[ -z "$token" ]]; then
+    echo "Account '$name' not found. Run 'supabase_login list' to see saved accounts."
+    exit 1
+  fi
+
+  echo "Logging in as '$name'..."
+  supabase login --token "$token"
+  echo "Logged in as '$name'."
+}
+
+cmd_interactive() {
+  local list
+  list=$(get_account_list)
+
+  if [[ -z "$list" ]]; then
+    echo "No accounts saved. Add one with:"
+    echo "  supabase_login add <name> <token>"
+    exit 0
+  fi
+
+  # Build array of account names
+  local accounts=()
+  IFS=',' read -ra accounts <<< "$list"
+
+  echo "Select an account:"
+  echo ""
+  for i in "${!accounts[@]}"; do
+    echo "  $((i + 1))) ${accounts[$i]}"
+  done
+  echo ""
+  read -rp "Enter number (1-${#accounts[@]}): " choice
+
+  if [[ -z "$choice" || "$choice" -lt 1 || "$choice" -gt "${#accounts[@]}" ]] 2>/dev/null; then
+    echo "Invalid selection."
+    exit 1
+  fi
+
+  local selected="${accounts[$((choice - 1))]}"
+  cmd_use "$selected"
+}
+
+# --- Main ---
+
+case "${1:-}" in
+  add)
+    cmd_add "$2" "$3"
+    ;;
+  remove)
+    cmd_remove "$2"
+    ;;
+  list)
+    cmd_list
+    ;;
+  use)
+    cmd_use "$2"
+    ;;
+  help|--help|-h)
+    echo "supabase_login - Manage multiple Supabase accounts"
+    echo ""
+    echo "Usage:"
+    echo "  supabase_login                       Interactive account selection"
+    echo "  supabase_login add <name> <token>     Save account to Keychain"
+    echo "  supabase_login remove <name>          Remove account"
+    echo "  supabase_login list                   List saved accounts"
+    echo "  supabase_login use <name>             Login with specific account"
+    echo ""
+    echo "Tokens are stored securely in macOS Keychain."
+    ;;
+  "")
+    cmd_interactive
+    ;;
+  *)
+    echo "Unknown command: $1"
+    echo "Run 'supabase_login help' for usage."
+    exit 1
+    ;;
+esac
