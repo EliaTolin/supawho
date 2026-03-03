@@ -6,6 +6,14 @@ CLI tool to manage multiple Supabase accounts. Tokens are stored securely in **m
 
 ## Installation
 
+### Homebrew (recommended)
+
+```bash
+brew install EliaTolin/tap/supawho
+```
+
+### Manual
+
 1. Clone the repository:
 
 ```bash
