@@ -34,10 +34,8 @@ esac
 
 NEW="${MAJOR}.${MINOR}.${PATCH}"
 
-echo ""
-echo "  📦 Releasing supawho"
-echo "     ${CURRENT} → ${NEW} (${BUMP})"
-echo ""
+echo -e "\n  📦 Releasing supawho"
+echo -e "     ${CURRENT} → ${NEW} (${BUMP})\n"
 
 # Update version in script
 sed -i '' "s/VERSION=\"${CURRENT}\"/VERSION=\"${NEW}\"/" "$SCRIPT"
@@ -49,7 +47,5 @@ git tag "v${NEW}"
 git push
 git push origin "v${NEW}"
 
-echo ""
-echo "  ✅ v${NEW} released!"
-echo "     GitHub Action will update the Homebrew formula automatically."
-echo ""
+echo -e "\n  ✅ v${NEW} released!"
+echo -e "     GitHub Action will update the Homebrew formula automatically.\n"

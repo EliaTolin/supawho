@@ -5,9 +5,8 @@ REPO="EliaTolin/supawho"
 INSTALL_DIR="/usr/local/bin"
 VERSION="${1:-latest}"
 
-echo ""
-echo "  🔍 Installing supawho..."
-echo ""
+echo -e "\n  🔍 Installing supawho...\n"
+
 
 # Resolve download URL
 if [ "$VERSION" = "latest" ]; then
@@ -39,7 +38,5 @@ else
   sudo chmod +x "${INSTALL_DIR}/supawho"
 fi
 
-echo "  ✅ supawho installed to ${INSTALL_DIR}/supawho"
-echo ""
-echo "  Run 'supawho help' to get started."
-echo ""
+echo -e "  ✅ supawho installed to ${INSTALL_DIR}/supawho\n"
+echo -e "  Run 'supawho help' to get started.\n"
