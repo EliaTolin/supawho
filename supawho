@@ -1,45 +1,28 @@
 #!/bin/bash
 # supawho - Manage multiple Supabase accounts securely via macOS Keychain
-#
-# Usage:
-#   supawho              → Interactive account selection + login
-#   supawho add <name> <token>  → Save account token to Keychain
-#   supawho remove <name>       → Remove account from Keychain
-#   supawho list                → List saved accounts
-#   supawho use <name>          → Login with specific account
-#
-# Install globally:
-#   cp supawho /usr/local/bin/ && chmod +x /usr/local/bin/supawho
 
 VERSION="1.2.0"
+KEYCHAIN_SERVICE="supabase-cli-accounts"
+KEYCHAIN_INDEX_KEY="_account_list"
 
 show_banner() {
   local green=$'\033[1;32m'
   local reset=$'\033[0m'
-  echo ""
-  printf '%s%s%s\n' "$green" '   ___  _   _ ___  ___  _    _ _  _  ___' "$reset"
-  printf '%s%s%s\n' "$green" '  / __|| | | | _ \/ _ \| |  | | || |/ _ \' "$reset"
-  printf '%s%s%s\n' "$green" '  \__ \| |_| |  _/ (_) | |/\| | __ | (_)' "$reset"
-  printf '%s%s%s\n' "$green" '  |___/ \___/|_|  \__\_\__/\__|_||_|\___/' "$reset"
-  echo ""
-  echo "     🔍 Who are you today?"
-  echo ""
+  echo -e "\n${green}   ___  _   _ ___  ___  _    _ _  _  ___${reset}"
+  echo -e "${green}  / __|| | | | _ \/ _ \| |  | | || |/ _ \\\\${reset}"
+  echo -e "${green}  \__ \| |_| |  _/ (_) | |/\| | __ | (_)${reset}"
+  echo -e "${green}  |___/ \___/|_|  \__\_\__/\__|_||_|\___/${reset}"
+  echo -e "\n     🔍 Who are you today?\n"
 }
-
-KEYCHAIN_SERVICE="supabase-cli-accounts"
-KEYCHAIN_INDEX_KEY="_account_list"
 
 # --- Helpers ---
 
 get_account_list() {
-  local list
-  list=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_INDEX_KEY" -w 2>/dev/null)
-  echo "$list"
+  security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_INDEX_KEY" -w 2>/dev/null
 }
 
 save_account_list() {
   local list="$1"
-  # Delete old entry if exists
   security delete-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_INDEX_KEY" 2>/dev/null
   security add-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_INDEX_KEY" -w "$list"
 }
@@ -52,25 +35,19 @@ get_token() {
 # --- Commands ---
 
 cmd_guided_add() {
-  echo "  No accounts found. Let's add your first one!"
-  echo ""
-  echo "  Get your token here:"
-  echo "  → https://supabase.com/dashboard/account/tokens"
-  echo ""
+  echo -e "  No accounts found. Let's add your first one!\n"
+  echo -e "  Get your token here:\n  → https://supabase.com/dashboard/account/tokens\n"
+  
   read -rp "  Account name (e.g. myproject): " name
-  if [[ -z "$name" ]]; then
-    echo "  Aborted."
-    exit 1
-  fi
+  [[ -z "$name" ]] && echo "  Aborted." && exit 1
+  
   read -rp "  Access token (sbp_...): " token
-  if [[ -z "$token" ]]; then
-    echo "  Aborted."
-    exit 1
-  fi
-  echo ""
+  [[ -z "$token" ]] && echo "  Aborted." && exit 1
+  
   cmd_add "$name" "$token"
-  echo ""
-  read -rp "  Login now as '$name'? [Y/n] " confirm
+  
+  local login_prompt="\n  Login now as '$name'? [Y/n] "
+  read -rp "$login_prompt" confirm
   if [[ -z "$confirm" || "$confirm" =~ ^[Yy]$ ]]; then
     cmd_use "$name"
   fi
@@ -86,11 +63,9 @@ cmd_add() {
     exit 0
   fi
 
-  # Save token to Keychain
   security delete-generic-password -s "$KEYCHAIN_SERVICE" -a "$name" 2>/dev/null
   security add-generic-password -s "$KEYCHAIN_SERVICE" -a "$name" -w "$token"
 
-  # Update account list
   local list
   list=$(get_account_list)
   if [[ -z "$list" ]]; then
@@ -105,15 +80,10 @@ cmd_add() {
 
 cmd_remove() {
   local name="$1"
-
-  if [[ -z "$name" ]]; then
-    echo "Usage: supawho remove <name>"
-    exit 1
-  fi
+  [[ -z "$name" ]] && echo "Usage: supawho remove <name>" && exit 1
 
   security delete-generic-password -s "$KEYCHAIN_SERVICE" -a "$name" 2>/dev/null
 
-  # Update account list
   local list
   list=$(get_account_list)
   list=$(echo "$list" | tr ',' '\n' | grep -vx "$name" | paste -sd ',' -)
@@ -127,8 +97,7 @@ cmd_list() {
   list=$(get_account_list)
 
   if [[ -z "$list" ]]; then
-    echo "No accounts saved. Add one with:"
-    echo "  supawho add <name> <token>"
+    echo -e "No accounts saved. Add one with:\n  supawho add <name> <token>"
     exit 0
   fi
 
@@ -140,15 +109,10 @@ cmd_list() {
 
 cmd_use() {
   local name="$1"
-
-  if [[ -z "$name" ]]; then
-    echo "Usage: supawho use <name>"
-    exit 1
-  fi
+  [[ -z "$name" ]] && echo "Usage: supawho use <name>" && exit 1
 
   local token
   token=$(get_token "$name")
-
   if [[ -z "$token" ]]; then
     echo "Account '$name' not found. Run 'supawho list' to see saved accounts."
     exit 1
@@ -164,69 +128,48 @@ cmd_interactive() {
   list=$(get_account_list)
 
   show_banner
+  [[ -z "$list" ]] && cmd_guided_add && exit 0
 
-  if [[ -z "$list" ]]; then
-    cmd_guided_add
-    exit 0
-  fi
-
-  # Build array of account names
   local accounts=()
   IFS=',' read -ra accounts <<< "$list"
 
-  echo "Select an account:"
-  echo ""
+  echo -e "Select an account:\n"
   for i in "${!accounts[@]}"; do
     echo "  $((i + 1))) ${accounts[$i]}"
   done
-  echo ""
-  read -rp "Enter number (1-${#accounts[@]}): " choice
+  
+  local select_prompt="\nEnter number (1-${#accounts[@]}): "
+  read -rp "$select_prompt" choice
 
   if [[ -z "$choice" || "$choice" -lt 1 || "$choice" -gt "${#accounts[@]}" ]] 2>/dev/null; then
     echo "Invalid selection."
     exit 1
   fi
 
-  local selected="${accounts[$((choice - 1))]}"
-  cmd_use "$selected"
+  cmd_use "${accounts[$((choice - 1))]}"
 }
 
 # --- Main ---
 
 case "${1:-}" in
-  add)
-    cmd_add "$2" "$3"
-    ;;
-  remove)
-    cmd_remove "$2"
-    ;;
-  list)
-    cmd_list
-    ;;
-  use)
-    cmd_use "$2"
-    ;;
-  version|--version|-v)
-    echo "supawho ${VERSION}"
-    ;;
+  add)             cmd_add "$2" "$3" ;;
+  remove)          cmd_remove "$2" ;;
+  list)            cmd_list ;;
+  use)             cmd_use "$2" ;;
+  version|--version|-v) echo "supawho ${VERSION}" ;;
   help|--help|-h)
     show_banner
-    echo "Usage:"
+    echo -e "Usage:"
     echo "  supawho                       Interactive account selection"
     echo "  supawho add <name> <token>     Save account to Keychain"
     echo "  supawho remove <name>          Remove account"
     echo "  supawho list                   List saved accounts"
     echo "  supawho use <name>             Login with specific account"
-    echo "  supawho version                Show version"
-    echo ""
+    echo -e "  supawho version                Show version\n"
     echo "Tokens are stored securely in macOS Keychain."
     ;;
-  "")
-    cmd_interactive
-    ;;
-  *)
-    echo "Unknown command: $1"
-    echo "Run 'supawho help' for usage."
-    exit 1
-    ;;
+  "")              cmd_interactive ;;
+  *)               echo "Unknown command: $1"
+                   echo "Run 'supawho help' for usage."
+                   exit 1 ;;
 esac
