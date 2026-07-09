@@ -1,7 +1,7 @@
 #!/bin/bash
 # supawho - Manage multiple Supabase accounts securely via macOS Keychain
 
-VERSION="1.3.1"
+VERSION="1.3.2"
 KEYCHAIN_SERVICE="supabase-cli-accounts"
 KEYCHAIN_INDEX_KEY="_account_list"
 
