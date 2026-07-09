@@ -91,6 +91,7 @@ supawho add myproject sbp_xxxxxxxxxxxxx
 | `supawho add <name> <token>` | Save a new account |
 | `supawho use <name>` | Switch to an account |
 | `supawho list` | Show all saved accounts |
+| `supawho rename <old> <new>` | Rename a saved account |
 | `supawho remove <name>` | Delete an account |
 
 ### Interactive mode
@@ -132,6 +133,19 @@ Your tokens **never touch the filesystem**. They are stored exclusively in the *
 
 - **macOS** — uses the `security` command for Keychain access
 - [**Supabase CLI**](https://supabase.com/docs/guides/cli) — installed and available in `$PATH`
+
+<br>
+
+## 🛠 Troubleshooting
+
+**`Account not found` when running `supawho use`**
+Run `supawho list` to check the exact name — account names are case-sensitive.
+
+**The token stops working after switching**
+Confirm the token is still valid in [Supabase Dashboard → Access Tokens](https://supabase.com/dashboard/account/tokens), then re-add the account with a fresh one: `supawho add <name> <token>`.
+
+**The install script fails**
+Make sure `curl` is available. If `/usr/local/bin` is not writable, the script falls back to `sudo`, so you may be prompted for your password.
 
 <br>
 
