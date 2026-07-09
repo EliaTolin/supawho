@@ -41,7 +41,8 @@ cmd_guided_add() {
   read -rp "  Account name (e.g. myproject): " name
   [[ -z "$name" ]] && echo "  Aborted." && exit 1
   
-  read -rp "  Access token (sbp_...): " token
+  read -rsp "  Access token (sbp_...): " token
+  echo
   [[ -z "$token" ]] && echo "  Aborted." && exit 1
   
   cmd_add "$name" "$token"
