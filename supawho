@@ -32,6 +32,16 @@ get_token() {
   security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$name" -w 2>/dev/null
 }
 
+# The account index is a comma-separated list, so a name containing a comma or
+# whitespace would corrupt it.
+validate_account_name() {
+  local name="$1"
+  if [[ "$name" == *,* || "$name" =~ [[:space:]] ]]; then
+    echo "Account name may not contain commas or whitespace."
+    exit 1
+  fi
+}
+
 # --- Commands ---
 
 cmd_guided_add() {
@@ -63,6 +73,8 @@ cmd_add() {
     exit 0
   fi
 
+  validate_account_name "$name"
+
   security delete-generic-password -s "$KEYCHAIN_SERVICE" -a "$name" 2>/dev/null
   security add-generic-password -s "$KEYCHAIN_SERVICE" -a "$name" -w "$token"
 
@@ -70,7 +82,7 @@ cmd_add() {
   list=$(get_account_list)
   if [[ -z "$list" ]]; then
     list="$name"
-  elif ! echo "$list" | tr ',' '\n' | grep -qx "$name"; then
+  elif ! echo "$list" | tr ',' '\n' | grep -Fqx -- "$name"; then
     list="$list,$name"
   fi
   save_account_list "$list"
@@ -115,6 +127,8 @@ cmd_rename() {
     fi
   fi
 
+  validate_account_name "$new_name"
+
   local token
   token=$(get_token "$old_name")
   if [[ -z "$token" ]]; then
@@ -126,9 +140,15 @@ cmd_rename() {
   security add-generic-password -s "$KEYCHAIN_SERVICE" -a "$new_name" -w "$token"
   security delete-generic-password -s "$KEYCHAIN_SERVICE" -a "$old_name" 2>/dev/null
 
-  local list
+  local list entries=() i
   list=$(get_account_list)
-  list=$(echo "$list" | tr ',' '\n' | sed "s/^${old_name}$/${new_name}/" | paste -sd ',' -)
+  IFS=',' read -ra entries <<< "$list"
+  for i in "${!entries[@]}"; do
+    if [[ "${entries[$i]}" == "$old_name" ]]; then
+      entries[$i]="$new_name"
+    fi
+  done
+  list=$(IFS=','; echo "${entries[*]}")
   save_account_list "$list"
 
   echo "Account '$old_name' renamed to '$new_name'."
@@ -142,7 +162,7 @@ cmd_remove() {
 
   local list
   list=$(get_account_list)
-  list=$(echo "$list" | tr ',' '\n' | grep -vx "$name" | paste -sd ',' -)
+  list=$(echo "$list" | tr ',' '\n' | grep -Fvx -- "$name" | paste -sd ',' -)
   save_account_list "$list"
 
   echo "Account '$name' removed."
