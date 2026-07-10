@@ -1,0 +1,85 @@
+version: 2
+
+project_name: supawho
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: supawho
+    main: .
+    binary: supawho
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    # Use uname-style names (Darwin/Linux/Windows, x86_64) so the install
+    # scripts and the built-in `supawho upgrade` can predict the file name.
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
+
+checksum:
+  name_template: "checksums.txt"
+
+# Native Linux packages (.deb / .rpm / .apk) attached to each GitHub Release.
+# Covers apt/dnf/apk users who install the downloaded package directly.
+nfpms:
+  - id: linux-packages
+    package_name: supawho
+    vendor: Elia Tolin
+    homepage: "https://github.com/EliaTolin/supawho"
+    maintainer: "Elia Tolin <EliaTolin@users.noreply.github.com>"
+    description: "Manage multiple Supabase CLI accounts securely across macOS, Linux and Windows"
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    bindir: /usr/bin
+
+release:
+  github:
+    owner: EliaTolin
+    name: supawho
+  # release-please already created the GitHub Release + tag; just add the
+  # binaries and checksums to it instead of creating a new one.
+  mode: append
+
+# Automatically update the Homebrew cask on the tap.
+# Replaces the previous update-homebrew.yml GitHub Action.
+homebrew_casks:
+  - name: supawho
+    repository:
+      owner: EliaTolin
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://github.com/EliaTolin/supawho"
+    description: "Manage multiple Supabase CLI accounts securely across macOS, Linux and Windows"
+    # The binary is unsigned; strip the Gatekeeper quarantine flag on install
+    # so it runs without "developer cannot be verified" prompts.
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/supawho"]
+          end

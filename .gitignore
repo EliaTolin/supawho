@@ -1,0 +1,9 @@
+# goreleaser output
+/dist/
+
+# locally built binary
+/supawho
+
+# Go
+*.test
+*.out
