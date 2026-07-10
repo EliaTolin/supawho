@@ -24,11 +24,15 @@ type LoginFunc func(token string) error
 // UpgradeFunc self-updates the running binary to the latest release.
 type UpgradeFunc func(ctx context.Context, current string, out io.Writer) error
 
+// ProfileFunc resolves the email and organizations behind an access token.
+type ProfileFunc func(token string) (email string, orgs []string, err error)
+
 // App holds the injectable dependencies for the command handlers.
 type App struct {
 	Store   *store.Store
 	Login   LoginFunc
 	Upgrade UpgradeFunc
+	Profile ProfileFunc
 	In      io.Reader
 	Out     io.Writer
 	Version string
@@ -63,6 +67,8 @@ func (a *App) Run(args []string) int {
 		err = a.List()
 	case "use":
 		err = a.Use(arg(args, 1))
+	case "whoami", "who":
+		err = a.Whoami(arg(args, 1))
 	case "upgrade", "update":
 		err = a.runUpgrade()
 	case "version", "--version", "-v":

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"testing"
 
@@ -222,6 +223,78 @@ func TestUnknownCommand(t *testing.T) {
 	}
 }
 
+func TestWhoamiAll(t *testing.T) {
+	h := newHarness("")
+	_ = h.st.Add("proj-a", "tok_a")
+	_ = h.st.Add("proj-b", "tok_b")
+	h.app.Profile = func(token string) (string, []string, error) {
+		switch token {
+		case "tok_a":
+			return "a@example.com", []string{"Org A"}, nil
+		case "tok_b":
+			return "b@example.com", nil, nil
+		}
+		return "", nil, errors.New("unknown")
+	}
+	if code := h.app.Run([]string{"whoami"}); code != 0 {
+		t.Fatalf("exit = %d", code)
+	}
+	out := h.out.String()
+	if !strings.Contains(out, "proj-a") || !strings.Contains(out, "a@example.com") || !strings.Contains(out, "Org A") {
+		t.Fatalf("output missing proj-a row:\n%s", out)
+	}
+	if !strings.Contains(out, "proj-b") || !strings.Contains(out, "b@example.com") {
+		t.Fatalf("output missing proj-b row:\n%s", out)
+	}
+}
+
+func TestWhoamiSingle(t *testing.T) {
+	h := newHarness("")
+	_ = h.st.Add("proj-a", "tok_a")
+	_ = h.st.Add("proj-b", "tok_b")
+	var asked []string
+	h.app.Profile = func(token string) (string, []string, error) {
+		asked = append(asked, token)
+		return "a@example.com", nil, nil
+	}
+	if code := h.app.Run([]string{"whoami", "proj-a"}); code != 0 {
+		t.Fatalf("exit = %d", code)
+	}
+	if len(asked) != 1 || asked[0] != "tok_a" {
+		t.Fatalf("expected only proj-a queried, got %v", asked)
+	}
+}
+
+func TestWhoamiMissing(t *testing.T) {
+	h := newHarness("")
+	h.app.Profile = func(string) (string, []string, error) { return "", nil, nil }
+	if code := h.app.Run([]string{"whoami", "ghost"}); code != 1 {
+		t.Fatalf("exit = %d, want 1", code)
+	}
+	if !strings.Contains(h.out.String(), "not found") {
+		t.Fatalf("output = %q", h.out.String())
+	}
+}
+
+func TestWhoamiHandlesPerAccountError(t *testing.T) {
+	h := newHarness("")
+	_ = h.st.Add("good", "ok")
+	_ = h.st.Add("revoked", "bad")
+	h.app.Profile = func(token string) (string, []string, error) {
+		if token == "bad" {
+			return "", nil, errors.New("token is invalid or revoked")
+		}
+		return "good@example.com", nil, nil
+	}
+	if code := h.app.Run([]string{"whoami"}); code != 0 {
+		t.Fatalf("exit = %d (one bad token must not fail the whole command)", code)
+	}
+	out := h.out.String()
+	if !strings.Contains(out, "good@example.com") || !strings.Contains(out, "invalid or revoked") {
+		t.Fatalf("output = %q", out)
+	}
+}
+
 func TestVersionGolden(t *testing.T) {
 	h := newHarness("")
 	h.app.Run([]string{"version"})
@@ -243,6 +316,7 @@ const wantHelp = "\n" +
 	"  supawho remove <name>          Remove account\n" +
 	"  supawho list                   List saved accounts\n" +
 	"  supawho use <name>             Login with specific account\n" +
+	"  supawho whoami [name]          Show the email behind each account\n" +
 	"  supawho upgrade                Update supawho to the latest version\n" +
 	"  supawho version                Show version\n" +
 	"\n" +

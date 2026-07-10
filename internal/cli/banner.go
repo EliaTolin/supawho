@@ -27,6 +27,7 @@ func (a *App) help() {
 	fmt.Fprintln(a.Out, "  supawho remove <name>          Remove account")
 	fmt.Fprintln(a.Out, "  supawho list                   List saved accounts")
 	fmt.Fprintln(a.Out, "  supawho use <name>             Login with specific account")
+	fmt.Fprintln(a.Out, "  supawho whoami [name]          Show the email behind each account")
 	fmt.Fprintln(a.Out, "  supawho upgrade                Update supawho to the latest version")
 	fmt.Fprintln(a.Out, "  supawho version                Show version")
 	fmt.Fprintln(a.Out, "")
