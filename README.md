@@ -153,6 +153,7 @@ supawho add myproject sbp_xxxxxxxxxxxxx
 | `supawho add <name> <token>` | Save a new account |
 | `supawho use <name>` | Switch to an account |
 | `supawho list` | Show all saved accounts |
+| `supawho whoami [name]` | Reveal the email + organizations behind each account |
 | `supawho rename <old> <new>` | Rename a saved account |
 | `supawho remove <name>` | Delete an account |
 | `supawho upgrade` | Update to the latest version |
@@ -176,6 +177,20 @@ Select an account:
 
 Enter number (1-2):
 ```
+
+### Which account is which?
+
+Got a dozen accounts and can't remember whose is whose? `supawho whoami` asks Supabase and maps each one to its **email and organizations**:
+
+```
+$ supawho whoami
+ACCOUNT          EMAIL                     ORGANIZATION
+client-a         you@example.com           Client A
+side-project     you+dev@example.com       Personal, Labs
+old-gig          (token is invalid or revoked)
+```
+
+Add a name to look up a single account: `supawho whoami client-a`.
 
 <br>
 

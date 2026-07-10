@@ -19,6 +19,10 @@ func main() {
 		Store:   store.NewKeyring(),
 		Login:   supabase.Login,
 		Upgrade: updater.Run,
+		Profile: func(token string) (string, []string, error) {
+			id, err := supabase.Whoami(token)
+			return id.Email, id.Orgs, err
+		},
 		In:      os.Stdin,
 		Out:     os.Stdout,
 		Version: current,

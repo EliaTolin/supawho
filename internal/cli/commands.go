@@ -3,6 +3,8 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/EliaTolin/supawho/internal/store"
 )
@@ -140,6 +142,54 @@ func (a *App) List() error {
 		fmt.Fprintf(a.Out, "  - %s\n", n)
 	}
 	return nil
+}
+
+// Whoami shows the email (and organizations) behind each saved account by
+// querying the Supabase Management API. With a name, only that account is shown.
+func (a *App) Whoami(name string) error {
+	if a.Profile == nil {
+		return errors.New("whoami is not available in this build")
+	}
+
+	var names []string
+	if name != "" {
+		if _, err := a.Store.Get(name); errors.Is(err, store.ErrNotFound) {
+			fmt.Fprintf(a.Out, "Account '%s' not found. Run 'supawho list' to see saved accounts.\n", name)
+			return errHandled
+		} else if err != nil {
+			return err
+		}
+		names = []string{name}
+	} else {
+		all, err := a.Store.List()
+		if err != nil {
+			return err
+		}
+		if len(all) == 0 {
+			fmt.Fprintln(a.Out, "No accounts saved. Add one with:")
+			fmt.Fprintln(a.Out, "  supawho add <name> <token>")
+			return nil
+		}
+		names = all
+	}
+
+	fmt.Fprintln(a.Out, "Looking up accounts on Supabase...")
+	tw := tabwriter.NewWriter(a.Out, 0, 2, 2, ' ', 0)
+	fmt.Fprintln(tw, "ACCOUNT\tEMAIL\tORGANIZATION")
+	for _, n := range names {
+		token, err := a.Store.Get(n)
+		if err != nil {
+			fmt.Fprintf(tw, "%s\t(not found)\t\n", n)
+			continue
+		}
+		email, orgs, err := a.Profile(token)
+		if err != nil {
+			fmt.Fprintf(tw, "%s\t(%v)\t\n", n, err)
+			continue
+		}
+		fmt.Fprintf(tw, "%s\t%s\t%s\n", n, email, strings.Join(orgs, ", "))
+	}
+	return tw.Flush()
 }
 
 // Use logs in with the token of the named account.
