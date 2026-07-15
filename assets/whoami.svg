@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" font-family="'SF Mono','Menlo','Consolas','Liberation Mono',monospace">
+  <!-- window -->
+  <rect x="1" y="1" width="718" height="298" rx="12" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+  <!-- title bar -->
+  <path d="M1 13 A12 12 0 0 1 13 1 H707 A12 12 0 0 1 719 13 V38 H1 Z" fill="#161b22"/>
+  <circle cx="26" cy="19" r="6" fill="#ff5f56"/>
+  <circle cx="46" cy="19" r="6" fill="#ffbd2e"/>
+  <circle cx="66" cy="19" r="6" fill="#27c93f"/>
+  <text x="360" y="24" text-anchor="middle" fill="#7d8590" font-size="13">supawho</text>
+  <line x1="1" y1="38" x2="719" y2="38" stroke="#30363d" stroke-width="1"/>
+
+  <!-- body -->
+  <g font-size="15">
+    <!-- command -->
+    <text x="28" y="72"><tspan fill="#3ecf8e" font-weight="bold">$</tspan><tspan fill="#e6edf3"> supawho whoami</tspan></text>
+    <text x="28" y="98" fill="#6e7681">Looking up accounts on Supabase...</text>
+
+    <!-- header -->
+    <text x="28"  y="134" fill="#7d8590" letter-spacing="0.5">ACCOUNT</text>
+    <text x="210" y="134" fill="#7d8590" letter-spacing="0.5">EMAIL</text>
+    <text x="452" y="134" fill="#7d8590" letter-spacing="0.5">ORGANIZATION</text>
+
+    <!-- rows -->
+    <text x="28"  y="166" fill="#3ecf8e">client-a</text>
+    <text x="210" y="166" fill="#e6edf3">you@example.com</text>
+    <text x="452" y="166" fill="#8b949e">Client A</text>
+
+    <text x="28"  y="196" fill="#3ecf8e">side-project</text>
+    <text x="210" y="196" fill="#e6edf3">you+dev@example.com</text>
+    <text x="452" y="196" fill="#8b949e">Personal, Labs</text>
+
+    <text x="28"  y="226" fill="#3ecf8e">staging</text>
+    <text x="210" y="226" fill="#e6edf3">you+ops@example.com</text>
+    <text x="452" y="226" fill="#8b949e">Acme Inc</text>
+
+    <text x="28"  y="256" fill="#3ecf8e">old-gig</text>
+    <text x="210" y="256" fill="#f85149">(token is invalid or revoked)</text>
+
+    <!-- cursor -->
+    <text x="28" y="286"><tspan fill="#3ecf8e" font-weight="bold">$</tspan><tspan fill="#e6edf3"> </tspan><tspan fill="#3ecf8e">▋</tspan></text>
+  </g>
+</svg>

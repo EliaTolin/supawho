@@ -43,11 +43,28 @@ One command to jump between projects and clients. 🔍
 
 | | |
 |---|---|
-| 🔐 **Secure by design** | Tokens live in the OS keychain — encrypted, never written to a file |
+| 🔐 **Secure by design** | Tokens live in the OS secret store — encrypted, never written to a file |
+| 🔎 **Know who is who** | `supawho whoami` maps every account to its real email + organizations |
 | 🖥️ **Truly cross-platform** | One static binary for macOS, Linux and Windows. No runtime to install |
 | ⚡ **Instant switching** | `supawho use client-a` and you're logged in |
 | 🔄 **Self-updating** | `supawho upgrade` keeps you current on any OS |
 | 🍺 **Installs everywhere** | Homebrew, `.deb`/`.rpm`/`.apk` packages, or a one-line script |
+
+<br>
+
+## ⚡ Quick start
+
+```bash
+# 1. Install (macOS shown — Linux & Windows below)
+brew install EliaTolin/tap/supawho
+
+# 2. Use it
+supawho add work sbp_your_token   # save an account (once)
+supawho use work                  # switch to it in a second
+supawho whoami                    # forgot which is which? map them all
+```
+
+> Not on macOS? Grab your one-liner from [Installation](#-installation) — `install.sh` for Linux, `install.ps1` for Windows.
 
 <br>
 
@@ -157,6 +174,7 @@ supawho add myproject sbp_xxxxxxxxxxxxx
 | `supawho rename <old> <new>` | Rename a saved account |
 | `supawho remove <name>` | Delete an account |
 | `supawho upgrade` | Update to the latest version |
+| `supawho version` | Print the installed version |
 
 ### Interactive mode
 
@@ -180,15 +198,11 @@ Enter number (1-2):
 
 ### Which account is which?
 
-Got a dozen accounts and can't remember whose is whose? `supawho whoami` asks Supabase and maps each one to its **email and organizations**:
+Got a dozen accounts and can't remember whose is whose? `supawho whoami` asks Supabase and maps each one to its **email and organizations** — a revoked token is flagged on its own row without breaking the rest:
 
-```
-$ supawho whoami
-ACCOUNT          EMAIL                     ORGANIZATION
-client-a         you@example.com           Client A
-side-project     you+dev@example.com       Personal, Labs
-old-gig          (token is invalid or revoked)
-```
+<p align="center">
+  <img src="assets/whoami.svg" alt="supawho whoami output" width="720" />
+</p>
 
 Add a name to look up a single account: `supawho whoami client-a`.
 
@@ -252,6 +266,14 @@ Your keyring is locked or no Secret Service is running. Unlock your login keyrin
 
 **`supawho upgrade` says it's managed by a package manager**
 That's on purpose — update through the manager you installed it with (see the table above).
+
+<br>
+
+## 🤝 Contributing
+
+Issues, ideas and PRs are welcome — this project grew cross-platform thanks to the community. Special thanks to [@igorgomes3](https://github.com/igorgomes3) whose [supawho-linux](https://github.com/igorgomes3/supawho-linux) fork sparked the multi-OS rewrite.
+
+Found a bug or want a feature? [Open an issue](https://github.com/EliaTolin/supawho/issues).
 
 <br>
 
