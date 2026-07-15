@@ -55,11 +55,16 @@ One command to jump between projects and clients. 🔍
 ## ⚡ Quick start
 
 ```bash
-brew install EliaTolin/tap/supawho     # or: curl -fsSL .../install.sh | bash
-supawho add work sbp_your_token        # save an account (once)
-supawho use work                       # switch to it in a second
-supawho whoami                         # forgot which is which? map them all
+# 1. Install (macOS shown — Linux & Windows below)
+brew install EliaTolin/tap/supawho
+
+# 2. Use it
+supawho add work sbp_your_token   # save an account (once)
+supawho use work                  # switch to it in a second
+supawho whoami                    # forgot which is which? map them all
 ```
+
+> Not on macOS? Grab your one-liner from [Installation](#-installation) — `install.sh` for Linux, `install.ps1` for Windows.
 
 <br>
 
