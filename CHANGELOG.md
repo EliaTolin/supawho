@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/EliaTolin/supawho/compare/v1.5.0...v1.6.0) (2026-07-21)
+
+
+### Features
+
+* add find command to locate which account owns a project ([#12](https://github.com/EliaTolin/supawho/issues/12)) ([e727c9e](https://github.com/EliaTolin/supawho/commit/e727c9e1bf6896a98fcdbbf8879ff5064ebb00a4))
+
 ## [1.5.0](https://github.com/EliaTolin/supawho/compare/v1.4.0...v1.5.0) (2026-07-10)
 
 
