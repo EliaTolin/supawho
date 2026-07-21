@@ -1,29 +1,57 @@
 ---
-title: supawho
-description: Switch between multiple Supabase accounts in seconds — on any OS. Tokens stay in your OS secret vault, never on disk.
+title: supawho — manage multiple Supabase accounts
+description: supawho is a free, open-source CLI to switch between multiple Supabase accounts in seconds on macOS, Linux and Windows. Access tokens stay in your OS secret vault, never on disk.
 template: splash
+tableOfContents: false
 hero:
-  tagline: Switch between multiple Supabase accounts in seconds — on any OS. Your tokens stay in the OS secret vault, never on disk.
+  title: Manage multiple Supabase accounts
+  tagline: Switch between accounts in seconds — on macOS, Linux and Windows. Your tokens stay in the OS secret vault, never on disk.
+  image:
+    file: ../../assets/logo.png
+    alt: supawho — a detective cat mascot with a magnifying glass
   actions:
     - text: Get started
       link: /supawho/guides/getting-started/
       icon: right-arrow
+      variant: primary
     - text: View on GitHub
       link: https://github.com/EliaTolin/supawho
       icon: external
       variant: minimal
+head:
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "supawho",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "macOS, Linux, Windows",
+        "description": "Free, open-source CLI to manage and switch between multiple Supabase accounts. Access tokens are stored in the OS secret vault, never on disk.",
+        "url": "https://www.eliatolin.it/supawho/",
+        "downloadUrl": "https://github.com/EliaTolin/supawho/releases",
+        "license": "https://github.com/EliaTolin/supawho/blob/main/LICENSE",
+        "author": { "@type": "Person", "name": "Elia Tolin" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 import Terminal from '../../components/Terminal.astro';
 
+<div class="hx-install"><span class="hx-dollar">$</span>brew install EliaTolin/tap/supawho</div>
+
 <Terminal />
 
-## Why supawho
+## Manage every Supabase account from one CLI
+
+If you juggle a personal org, several clients and a work account, supawho ends the endless `supabase logout → login → paste token` dance. Save each **Supabase account** once, then switch in a second — on **macOS, Linux or Windows**, from a single dependency-free binary.
 
 <CardGrid>
 	<Card title="Know who is who" icon="magnifier">
-		`supawho whoami` maps every saved account to its real email and organizations.
+		[`supawho whoami`](/supawho/commands/whoami/) maps every saved account to its real email and organizations.
 	</Card>
 	<Card title="Secure by design" icon="approve-check">
 		Tokens live in Keychain / Secret Service / Credential Manager — encrypted, never a file.
@@ -32,23 +60,22 @@ import Terminal from '../../components/Terminal.astro';
 		One static binary for macOS, Linux and Windows. No runtime to install.
 	</Card>
 	<Card title="Reverse lookup" icon="random">
-		`supawho find <ref>` tells you which account owns a given project.
+		[`supawho find <ref>`](/supawho/commands/find/) tells you which account owns a given project.
 	</Card>
 	<Card title="Self-updating" icon="rocket">
-		`supawho upgrade` pulls the latest release, checksum-verified.
+		[`supawho upgrade`](/supawho/commands/upgrade/) pulls the latest release, checksum-verified.
 	</Card>
 	<Card title="Installs everywhere" icon="download">
 		Homebrew, `.deb` / `.rpm` / `.apk`, or a one-line script.
 	</Card>
 </CardGrid>
 
-## Quick start
+## Switch accounts in three commands
 
 ```bash
-# macOS (Linux & Windows on the Getting started page)
-brew install EliaTolin/tap/supawho
-
-supawho add work sbp_your_token   # save an account once
-supawho use work                  # switch in a second
+supawho add work sbp_your_token   # save a Supabase account once
+supawho use work                  # switch to it in a second
 supawho whoami                    # forgot which is which? map them all
 ```
+
+Ready to try it? Head to [Getting started](/supawho/guides/getting-started/), or read [How it works](/supawho/guides/how-it-works/) for the model behind supawho.
