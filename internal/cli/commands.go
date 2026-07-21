@@ -192,6 +192,80 @@ func (a *App) Whoami(name string) error {
 	return tw.Flush()
 }
 
+// Find is the reverse lookup: given a Supabase project ref (or a name
+// substring), it reports which saved account owns a matching project.
+func (a *App) Find(query string) error {
+	if query == "" {
+		fmt.Fprintln(a.Out, "Usage: supawho find <project-ref>")
+		return errHandled
+	}
+	if a.Lookup == nil {
+		return errors.New("find is not available in this build")
+	}
+
+	names, err := a.Store.List()
+	if err != nil {
+		return err
+	}
+	if len(names) == 0 {
+		fmt.Fprintln(a.Out, "No accounts saved.")
+		return errHandled
+	}
+
+	fmt.Fprintf(a.Out, "Searching %d account(s) for %q...\n", len(names), query)
+	found := false
+	for _, n := range names {
+		token, err := a.Store.Get(n)
+		if err != nil {
+			continue
+		}
+		projects, err := a.Lookup(token)
+		if err != nil {
+			fmt.Fprintf(a.Out, "  %s: skipped (%v)\n", n, err)
+			continue
+		}
+		for _, p := range projects {
+			if p.Ref == query {
+				found = true
+				a.printMatch(n, token, p)
+			}
+		}
+	}
+
+	if !found {
+		fmt.Fprintf(a.Out, "No project matching %q in any saved account.\n", query)
+		return errHandled
+	}
+	return nil
+}
+
+// printMatch renders a rich detail block for a found project, enriching it with
+// the owning account's email (best-effort via the Supabase API).
+func (a *App) printMatch(account, token string, p Project) {
+	var email string
+	if a.Profile != nil {
+		if e, _, err := a.Profile(token); err == nil {
+			email = e
+		}
+	}
+
+	field := func(label, value string) {
+		if value != "" {
+			fmt.Fprintf(a.Out, "  %-14s%s\n", label, value)
+		}
+	}
+
+	fmt.Fprintf(a.Out, "\n  ✓ Found in account '%s'\n\n", account)
+	field("Project", p.Name)
+	field("Reference", p.Ref)
+	field("Organization", p.Org)
+	field("Region", p.Region)
+	field("Status", p.Status)
+	field("Email", email)
+	field("Account", account)
+	fmt.Fprintf(a.Out, "\n  Switch to it:  supawho use %s\n\n", account)
+}
+
 // Use logs in with the token of the named account.
 func (a *App) Use(name string) error {
 	if name == "" {
