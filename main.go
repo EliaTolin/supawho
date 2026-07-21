@@ -23,6 +23,17 @@ func main() {
 			id, err := supabase.Whoami(token)
 			return id.Email, id.Orgs, err
 		},
+		Lookup: func(token string) ([]cli.Project, error) {
+			projects, err := supabase.Projects(token)
+			if err != nil {
+				return nil, err
+			}
+			out := make([]cli.Project, len(projects))
+			for i, p := range projects {
+				out[i] = cli.Project{Ref: p.Ref, Name: p.Name, Org: p.Org, Region: p.Region, Status: p.Status}
+			}
+			return out, nil
+		},
 		In:      os.Stdin,
 		Out:     os.Stdout,
 		Version: current,

@@ -171,6 +171,7 @@ supawho add myproject sbp_xxxxxxxxxxxxx
 | `supawho use <name>` | Switch to an account |
 | `supawho list` | Show all saved accounts |
 | `supawho whoami [name]` | Reveal the email + organizations behind each account |
+| `supawho find <project-ref>` | Find which account owns a project |
 | `supawho rename <old> <new>` | Rename a saved account |
 | `supawho remove <name>` | Delete an account |
 | `supawho upgrade` | Update to the latest version |
@@ -205,6 +206,26 @@ Got a dozen accounts and can't remember whose is whose? `supawho whoami` asks Su
 </p>
 
 Add a name to look up a single account: `supawho whoami client-a`.
+
+### Which account owns this project?
+
+The reverse lookup: paste a Supabase project ref and `supawho find` tells you which saved account it lives in.
+
+```
+$ supawho find sjslmvggunljemhwbkgm
+
+  ✓ Found in account 'aurora'
+
+  Project       almanaccolo
+  Reference     sjslmvggunljemhwbkgm
+  Organization  AuroraDigital
+  Region        eu-central-1
+  Status        ACTIVE_HEALTHY
+  Email         mail@auroradigital.it
+  Account       aurora
+
+  Switch to it:  supawho use aurora
+```
 
 <br>
 

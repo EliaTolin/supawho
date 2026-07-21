@@ -295,6 +295,76 @@ func TestWhoamiHandlesPerAccountError(t *testing.T) {
 	}
 }
 
+func TestFindByRef(t *testing.T) {
+	h := newHarness("")
+	_ = h.st.Add("work", "tok_work")
+	_ = h.st.Add("personal", "tok_personal")
+	h.app.Lookup = func(token string) ([]Project, error) {
+		if token == "tok_personal" {
+			return []Project{{Ref: "abcdefghij0123456789", Name: "almanaccolo", Org: "aurora", Region: "eu-central-1"}}, nil
+		}
+		return []Project{{Ref: "zzz", Name: "Work Project"}}, nil
+	}
+	h.app.Profile = func(token string) (string, []string, error) {
+		if token == "tok_personal" {
+			return "me@personal.dev", nil, nil
+		}
+		return "", nil, nil
+	}
+	if code := h.app.Run([]string{"find", "abcdefghij0123456789"}); code != 0 {
+		t.Fatalf("exit = %d\n%s", code, h.out.String())
+	}
+	out := h.out.String()
+	for _, want := range []string{"Found in account 'personal'", "almanaccolo", "me@personal.dev", "aurora", "supawho use personal"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("output missing %q:\n%s", want, out)
+		}
+	}
+}
+
+func TestFindNotFound(t *testing.T) {
+	h := newHarness("")
+	_ = h.st.Add("work", "t")
+	h.app.Lookup = func(string) ([]Project, error) {
+		return []Project{{Ref: "r1", Name: "Something"}}, nil
+	}
+	if code := h.app.Run([]string{"find", "ghostref"}); code != 1 {
+		t.Fatalf("exit = %d, want 1", code)
+	}
+	if !strings.Contains(h.out.String(), "No project matching") {
+		t.Fatalf("output = %q", h.out.String())
+	}
+}
+
+func TestFindNoArg(t *testing.T) {
+	h := newHarness("")
+	if code := h.app.Run([]string{"find"}); code != 1 {
+		t.Fatalf("exit = %d, want 1", code)
+	}
+	if !strings.Contains(h.out.String(), "Usage: supawho find") {
+		t.Fatalf("output = %q", h.out.String())
+	}
+}
+
+func TestFindSkipsBadToken(t *testing.T) {
+	h := newHarness("")
+	_ = h.st.Add("good", "ok")
+	_ = h.st.Add("revoked", "bad")
+	h.app.Lookup = func(token string) ([]Project, error) {
+		if token == "bad" {
+			return nil, errors.New("token is invalid or revoked")
+		}
+		return []Project{{Ref: "target-ref", Name: "Hit"}}, nil
+	}
+	if code := h.app.Run([]string{"find", "target-ref"}); code != 0 {
+		t.Fatalf("exit = %d (a bad token must not break the search)", code)
+	}
+	out := h.out.String()
+	if !strings.Contains(out, "Found in account 'good'") || !strings.Contains(out, "revoked: skipped") {
+		t.Fatalf("output = %q", out)
+	}
+}
+
 func TestVersionGolden(t *testing.T) {
 	h := newHarness("")
 	h.app.Run([]string{"version"})
@@ -317,6 +387,7 @@ const wantHelp = "\n" +
 	"  supawho list                   List saved accounts\n" +
 	"  supawho use <name>             Login with specific account\n" +
 	"  supawho whoami [name]          Show the email behind each account\n" +
+	"  supawho find <project-ref>     Find which account owns a project\n" +
 	"  supawho upgrade                Update supawho to the latest version\n" +
 	"  supawho version                Show version\n" +
 	"\n" +

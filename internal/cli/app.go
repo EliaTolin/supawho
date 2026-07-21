@@ -27,12 +27,25 @@ type UpgradeFunc func(ctx context.Context, current string, out io.Writer) error
 // ProfileFunc resolves the email and organizations behind an access token.
 type ProfileFunc func(token string) (email string, orgs []string, err error)
 
+// Project is a Supabase project owned by an account, used by the reverse lookup.
+type Project struct {
+	Ref    string
+	Name   string
+	Org    string
+	Region string
+	Status string
+}
+
+// LookupFunc lists the projects an access token can access.
+type LookupFunc func(token string) ([]Project, error)
+
 // App holds the injectable dependencies for the command handlers.
 type App struct {
 	Store   *store.Store
 	Login   LoginFunc
 	Upgrade UpgradeFunc
 	Profile ProfileFunc
+	Lookup  LookupFunc
 	In      io.Reader
 	Out     io.Writer
 	Version string
@@ -69,6 +82,8 @@ func (a *App) Run(args []string) int {
 		err = a.Use(arg(args, 1))
 	case "whoami", "who":
 		err = a.Whoami(arg(args, 1))
+	case "find", "locate":
+		err = a.Find(arg(args, 1))
 	case "upgrade", "update":
 		err = a.runUpgrade()
 	case "version", "--version", "-v":
