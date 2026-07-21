@@ -1,69 +1,25 @@
 ---
-title: Commands
-description: The full supawho command reference — add, use, list, whoami, find, rename, remove and upgrade.
+title: Commands overview
+description: Every supawho command at a glance — add, use, list, whoami, find, rename, remove, upgrade and version — with links to each command's reference page.
 ---
+
+supawho has a small, focused command set. Each one has its own reference page with syntax, examples and exit codes.
 
 | Command | Description |
 |---|---|
-| `supawho` | Interactive account picker |
-| `supawho add <name> <token>` | Save a new account |
-| `supawho use <name>` | Switch to an account |
-| `supawho list` | Show all saved accounts |
-| `supawho whoami [name]` | Reveal the email + organizations behind each account |
-| `supawho find <project-ref>` | Find which account owns a project |
-| `supawho rename <old> <new>` | Rename a saved account |
-| `supawho remove <name>` | Delete an account |
-| `supawho upgrade` | Update to the latest version |
-| `supawho version` | Print the installed version |
+| [`supawho`](/supawho/commands/interactive/) | Interactive account picker |
+| [`supawho add <name> <token>`](/supawho/commands/add/) | Save a new account |
+| [`supawho use <name>`](/supawho/commands/use/) | Switch to an account |
+| [`supawho list`](/supawho/commands/list/) | List saved accounts |
+| [`supawho whoami [name]`](/supawho/commands/whoami/) | Reveal the email + organizations behind each account |
+| [`supawho find <project-ref>`](/supawho/commands/find/) | Find which account owns a project |
+| [`supawho rename <old> <new>`](/supawho/commands/rename/) | Rename a saved account |
+| [`supawho remove <name>`](/supawho/commands/remove/) | Delete an account |
+| [`supawho upgrade`](/supawho/commands/upgrade/) | Update to the latest version |
+| [`supawho version`](/supawho/commands/version/) | Print the installed version |
 
-## whoami — who is who
+## Conventions
 
-With many accounts it's hard to remember which name maps to which identity. `supawho whoami` asks Supabase and maps each account to its email and organizations:
-
-```
-$ supawho whoami
-ACCOUNT          EMAIL                     ORGANIZATION
-client-a         you@example.com           Client A
-side-project     you+dev@example.com       Personal, Labs
-old-gig          (token is invalid or revoked)
-```
-
-Add a name to look up a single account: `supawho whoami client-a`.
-
-## find — which account owns this project?
-
-The reverse lookup: paste a Supabase project ref and `supawho find` tells you which saved account it lives in, with the project's organization, region, status and the account's email.
-
-```
-$ supawho find sjslmvggunljemhwbkgm
-
-  ✓ Found in account 'aurora'
-
-  Project       almanaccolo
-  Reference     sjslmvggunljemhwbkgm
-  Organization  AuroraDigital
-  Region        eu-central-1
-  Status        ACTIVE_HEALTHY
-  Email         mail@auroradigital.it
-  Account       aurora
-
-  Switch to it:  supawho use aurora
-```
-
-If no account owns the ref, it exits with code `1` — handy in scripts.
-
-## upgrade — keep it current
-
-```bash
-supawho upgrade
-```
-
-Downloads the latest release, verifies its checksum, and swaps the binary in place. When installed through a package manager it won't fight it — it points you to the right command instead:
-
-| Installed via | How it updates |
-|---|---|
-| Homebrew | `brew upgrade supawho` |
-| Install script / raw binary | `supawho upgrade` |
-| `.deb` / `.rpm` / `.apk` | your system package manager |
-
-Set `SUPAWHO_NO_UPDATE_CHECK=1` to disable the background version check.
+- `<required>` arguments are shown in angle brackets; `[optional]` in square brackets.
+- Commands that succeed exit with code `0`; handled errors (not found, bad input) exit with `1`.
+- Account names may not contain commas or whitespace.
