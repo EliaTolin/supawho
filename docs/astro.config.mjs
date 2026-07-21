@@ -2,9 +2,9 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
-// Project site on GitHub Pages: https://eliatolin.github.io/supawho
+// Project site on GitHub Pages (custom domain): https://www.eliatolin.it/supawho
 export default defineConfig({
-	site: 'https://eliatolin.github.io',
+	site: 'https://www.eliatolin.it',
 	base: '/supawho',
 	integrations: [
 		starlight({
