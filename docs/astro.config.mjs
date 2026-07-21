@@ -14,7 +14,11 @@ export default defineConfig({
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/EliaTolin/supawho' },
 			],
-			customCss: ['./src/styles/custom.css'],
+			customCss: [
+				'@fontsource-variable/inter',
+				'@fontsource-variable/source-code-pro',
+				'./src/styles/custom.css',
+			],
 			sidebar: [
 				{ label: 'Getting started', slug: 'getting-started' },
 				{ label: 'Commands', slug: 'commands' },

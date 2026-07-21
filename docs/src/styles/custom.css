@@ -1,36 +1,97 @@
-/* supawho — Supabase-green accent + terminal hero */
+/* supawho docs — themed after the Supabase design system
+   (brand green #3fcf8e, warm near-black scale, Inter + Source Code Pro) */
 
 :root {
-	--sl-color-accent-low: #10331f;
-	--sl-color-accent: #1f9d6b;
-	--sl-color-accent-high: #b6f0d6;
-	--sl-color-text-accent: #3ecf8e;
+	--sl-font: 'Inter Variable', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	--sl-font-mono: 'Source Code Pro Variable', 'Source Code Pro', Menlo, monospace;
+
+	/* Radius (Supabase: 8px lg / 4px sm) */
+	--sl-border-radius: 8px;
 }
 
+/* --- Dark theme (Supabase default look) --- */
+:root {
+	--sb-bg: #1c1c1c;
+	--sb-surface: #1c1c1c;
+	--sb-surface-2: #232323;
+	--sb-green: #3fcf8e;
+	--sb-green-dim: #24b47e;
+
+	--sl-color-accent-low: #113123;
+	--sl-color-accent: #1d724c;
+	--sl-color-accent-high: #85e0b7;
+	--sl-color-text-accent: #3fcf8e;
+
+	--sl-color-white: #ededed;
+	--sl-color-gray-1: #d6d6d6;
+	--sl-color-gray-2: #bbbbbb;
+	--sl-color-gray-3: #7e7e7e;
+	--sl-color-gray-4: #505050;
+	--sl-color-gray-5: #2e2e2e;
+	--sl-color-gray-6: #232323;
+	--sl-color-gray-7: #1f1f1f;
+	--sl-color-black: #161616;
+
+	--sl-color-bg: #1c1c1c;
+	--sl-color-bg-nav: #161616;
+	--sl-color-bg-sidebar: #181818;
+	--sl-color-hairline-shade: #282828;
+}
+
+/* --- Light theme --- */
 :root[data-theme='light'] {
 	--sl-color-accent-low: #d8f5e7;
-	--sl-color-accent: #1f9d6b;
+	--sl-color-accent: #1d724c;
 	--sl-color-accent-high: #0d3d28;
-	--sl-color-text-accent: #128a5c;
+	--sl-color-text-accent: #158a5c;
+
+	--sl-color-white: #171717;
+	--sl-color-gray-1: #262626;
+	--sl-color-gray-2: #3e3e3e;
+	--sl-color-gray-3: #707070;
+	--sl-color-gray-5: #e6e6e6;
+	--sl-color-gray-6: #f2f2f2;
+	--sl-color-gray-7: #f7f7f7;
+	--sl-color-black: #ffffff;
+	--sl-color-bg: #ffffff;
+	--sl-color-bg-nav: #fbfbfb;
+	--sl-color-bg-sidebar: #fbfbfb;
 }
 
-/* Terminal card used on the landing hero */
+/* Brand wordmark in the header */
+.site-title {
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+/* Primary hero action → Supabase green button */
+.hero .actions a[data-variant='primary'] {
+	background: var(--sb-green);
+	border-color: var(--sb-green);
+	color: #06170e;
+	font-weight: 500;
+}
+.hero .actions a[data-variant='primary']:hover {
+	background: #55d89d;
+	border-color: #55d89d;
+}
+
+/* Terminal card on the landing hero */
 .term {
 	max-width: 760px;
 	margin: 2.5rem auto 0;
 	border: 1px solid var(--sl-color-gray-5);
 	border-radius: 12px;
 	overflow: hidden;
-	box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
-	background: #0d1117;
+	box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
+	background: #1c1c1c;
 }
-
-.term img {
+.term img,
+.term svg {
 	display: block;
 	width: 100%;
 }
 
-/* Tighten the splash hero copy */
 .hero .tagline {
-	max-width: 44ch;
+	max-width: 46ch;
 }
