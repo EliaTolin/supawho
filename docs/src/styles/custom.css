@@ -89,24 +89,50 @@
 	border: 0;
 }
 
-/* Green glow behind the Starlight hero */
+/* --- Hero: centered, restrained, Supabase-flavored --- */
 .hero {
-	position: relative;
+	grid-template-columns: 1fr;
+	justify-items: center;
+	text-align: center;
+	gap: 1.5rem;
+	padding-block: 2rem 1rem;
 }
-.hero::before {
-	content: '';
-	position: absolute;
-	inset: -25% -10% auto -10%;
-	height: 560px;
-	background: radial-gradient(48% 55% at 50% 0%, rgba(63, 207, 142, 0.16), transparent 72%);
-	z-index: -1;
-	pointer-events: none;
+.hero > .hero-html {
+	order: -1;
+	justify-content: center;
 }
-/* Mascot badge with a soft green halo */
 .hero img {
-	filter: drop-shadow(0 18px 50px rgba(63, 207, 142, 0.28));
+	width: 96px;
+	height: auto;
+	margin: 0 auto;
 }
-/* Primary action → bright Supabase green */
+.hero .stack {
+	align-items: center;
+	gap: 1.25rem;
+}
+.hero .copy {
+	align-items: center;
+	max-width: 44ch;
+}
+.hero h1 {
+	font-size: clamp(2rem, 4.5vw, 2.9rem);
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	line-height: 1.1;
+	max-width: 18ch;
+	text-wrap: balance;
+}
+.hero .tagline {
+	color: var(--sl-color-gray-2);
+	font-size: 1.125rem;
+	line-height: 1.6;
+	max-width: 46ch;
+}
+.hero .actions {
+	justify-content: center;
+	gap: 0.75rem;
+}
+/* Buttons — solid green primary, hairline-bordered secondary (Supabase) */
 .hero .actions a.primary,
 .hero .actions a.primary:hover {
 	background: var(--sb-green);
@@ -114,52 +140,42 @@
 	color: #06170e;
 }
 .hero .actions a.primary:hover {
-	background: #55d89d;
-	border-color: #55d89d;
+	filter: brightness(1.06);
 }
-@media (prefers-reduced-motion: no-preference) {
-	.hero img {
-		animation: hx-rise 0.7s ease both;
-	}
-	@keyframes hx-rise {
-		from {
-			opacity: 0;
-			transform: translateY(12px);
-		}
-		to {
-			opacity: 1;
-			transform: none;
-		}
-	}
+.hero .actions a.minimal {
+	border: 1px solid var(--sl-color-gray-5);
+	color: var(--sl-color-white);
+}
+.hero .actions a.minimal:hover {
+	background: var(--sl-color-gray-6);
 }
 
 /* Install command chip, centered under the hero */
 .hx-install {
 	display: table;
-	margin: 2rem auto 0;
+	margin: 1.75rem auto 0;
 	font-family: var(--sl-font-mono);
-	font-size: 0.9rem;
-	background: #171717;
+	font-size: 0.85rem;
+	background: var(--sl-color-gray-7);
 	border: 1px solid var(--sl-color-gray-5);
 	border-radius: 8px;
-	padding: 10px 18px;
-	color: var(--sl-color-gray-1);
+	padding: 9px 16px;
+	color: var(--sl-color-gray-2);
 }
 .hx-dollar {
 	color: var(--sb-green);
-	font-weight: 700;
 	margin-right: 8px;
+	user-select: none;
 }
 
-/* Terminal card on the landing hero */
+/* Terminal — the product shot, centered */
 .term {
-	max-width: 760px;
-	margin: 2.5rem auto 0;
+	max-width: 720px;
+	margin: 2rem auto 0;
 	border: 1px solid var(--sl-color-gray-5);
-	border-radius: 12px;
+	border-radius: 10px;
 	overflow: hidden;
-	box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
-	background: #1c1c1c;
+	background: #171717;
 }
 .term img,
 .term svg {

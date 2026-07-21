@@ -11,6 +11,7 @@ export default defineConfig({
 			title: 'supawho',
 			description:
 				'Switch between multiple Supabase accounts in seconds — on any OS. Tokens stay in your OS secret vault, never on disk.',
+			logo: { src: './src/assets/logo.png', alt: 'supawho' },
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/EliaTolin/supawho' },
 			],
