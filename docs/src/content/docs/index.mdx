@@ -1,0 +1,54 @@
+---
+title: supawho
+description: Switch between multiple Supabase accounts in seconds — on any OS. Tokens stay in your OS secret vault, never on disk.
+template: splash
+hero:
+  tagline: Switch between multiple Supabase accounts in seconds — on any OS. Your tokens stay in the OS secret vault, never on disk.
+  actions:
+    - text: Get started
+      link: /supawho/getting-started/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/EliaTolin/supawho
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import Terminal from '../../components/Terminal.astro';
+
+<Terminal />
+
+## Why supawho
+
+<CardGrid>
+	<Card title="Know who is who" icon="magnifier">
+		`supawho whoami` maps every saved account to its real email and organizations.
+	</Card>
+	<Card title="Secure by design" icon="approve-check">
+		Tokens live in Keychain / Secret Service / Credential Manager — encrypted, never a file.
+	</Card>
+	<Card title="Truly cross-platform" icon="laptop">
+		One static binary for macOS, Linux and Windows. No runtime to install.
+	</Card>
+	<Card title="Reverse lookup" icon="random">
+		`supawho find <ref>` tells you which account owns a given project.
+	</Card>
+	<Card title="Self-updating" icon="rocket">
+		`supawho upgrade` pulls the latest release, checksum-verified.
+	</Card>
+	<Card title="Installs everywhere" icon="download">
+		Homebrew, `.deb` / `.rpm` / `.apk`, or a one-line script.
+	</Card>
+</CardGrid>
+
+## Quick start
+
+```bash
+# macOS (Linux & Windows on the Getting started page)
+brew install EliaTolin/tap/supawho
+
+supawho add work sbp_your_token   # save an account once
+supawho use work                  # switch in a second
+supawho whoami                    # forgot which is which? map them all
+```

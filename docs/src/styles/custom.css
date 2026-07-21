@@ -1,0 +1,36 @@
+/* supawho — Supabase-green accent + terminal hero */
+
+:root {
+	--sl-color-accent-low: #10331f;
+	--sl-color-accent: #1f9d6b;
+	--sl-color-accent-high: #b6f0d6;
+	--sl-color-text-accent: #3ecf8e;
+}
+
+:root[data-theme='light'] {
+	--sl-color-accent-low: #d8f5e7;
+	--sl-color-accent: #1f9d6b;
+	--sl-color-accent-high: #0d3d28;
+	--sl-color-text-accent: #128a5c;
+}
+
+/* Terminal card used on the landing hero */
+.term {
+	max-width: 760px;
+	margin: 2.5rem auto 0;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
+	background: #0d1117;
+}
+
+.term img {
+	display: block;
+	width: 100%;
+}
+
+/* Tighten the splash hero copy */
+.hero .tagline {
+	max-width: 44ch;
+}
