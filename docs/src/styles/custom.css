@@ -38,42 +38,10 @@
 	--sl-color-hairline-shade: #282828;
 }
 
-/* --- Light theme --- */
-:root[data-theme='light'] {
-	--sl-color-accent-low: #d8f5e7;
-	--sl-color-accent: #1d724c;
-	--sl-color-accent-high: #0d3d28;
-	--sl-color-text-accent: #158a5c;
-
-	--sl-color-white: #171717;
-	--sl-color-gray-1: #262626;
-	--sl-color-gray-2: #3e3e3e;
-	--sl-color-gray-3: #707070;
-	--sl-color-gray-5: #e6e6e6;
-	--sl-color-gray-6: #f2f2f2;
-	--sl-color-gray-7: #f7f7f7;
-	--sl-color-black: #ffffff;
-	--sl-color-bg: #ffffff;
-	--sl-color-bg-nav: #fbfbfb;
-	--sl-color-bg-sidebar: #fbfbfb;
-}
-
 /* Brand wordmark in the header */
 .site-title {
 	font-weight: 700;
 	letter-spacing: -0.01em;
-}
-
-/* Primary hero action → Supabase green button */
-.hero .actions a[data-variant='primary'] {
-	background: var(--sb-green);
-	border-color: var(--sb-green);
-	color: #06170e;
-	font-weight: 500;
-}
-.hero .actions a[data-variant='primary']:hover {
-	background: #55d89d;
-	border-color: #55d89d;
 }
 
 /* --- WOW hero --- */

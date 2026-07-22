@@ -12,6 +12,10 @@ export default defineConfig({
 			description:
 				'Switch between multiple Supabase accounts in seconds — on any OS. Tokens stay in your OS secret vault, never on disk.',
 			logo: { src: './src/assets/logo.png', alt: 'supawho' },
+			components: {
+				ThemeSelect: './src/components/ThemeSelect.astro',
+				ThemeProvider: './src/components/ThemeProvider.astro',
+			},
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/EliaTolin/supawho' },
 			],
