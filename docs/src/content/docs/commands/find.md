@@ -3,7 +3,7 @@ title: supawho find
 description: Reverse lookup for Supabase projects — paste a project ref and supawho tells you which saved account owns it, with organization, region, status and email.
 ---
 
-The reverse of [`whoami`](/supawho/commands/whoami/): paste a Supabase **project ref** and `find` tells you which saved account owns it.
+The reverse of [`whoami`](/commands/whoami/): paste a Supabase **project ref** and `find` tells you which saved account owns it.
 
 ## Synopsis
 
@@ -60,4 +60,4 @@ The non-zero exit on "not found" makes `find` usable in scripts.
 
 ## See also
 
-- [`whoami`](/supawho/commands/whoami/) · [`use`](/supawho/commands/use/)
+- [`whoami`](/commands/whoami/) · [`use`](/commands/use/)

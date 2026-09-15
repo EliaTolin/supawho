@@ -28,4 +28,4 @@ Account 'acme' removed.
 
 ## See also
 
-- [`list`](/supawho/commands/list/) · [`rename`](/supawho/commands/rename/)
+- [`list`](/commands/list/) · [`rename`](/commands/rename/)

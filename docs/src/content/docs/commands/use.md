@@ -25,9 +25,9 @@ Logged in as 'client-a'.
 ## Behavior
 
 - Requires the [Supabase CLI](https://supabase.com/docs/guides/cli) on your `PATH` — supawho drives it, it doesn't reimplement login.
-- If the account doesn't exist, it prints `Account '<name>' not found.` and exits with code `1`. Run [`list`](/supawho/commands/list/) to see exact names (they're case-sensitive).
+- If the account doesn't exist, it prints `Account '<name>' not found.` and exits with code `1`. Run [`list`](/commands/list/) to see exact names (they're case-sensitive).
 
 ## See also
 
-- [`whoami`](/supawho/commands/whoami/) — confirm which email an account maps to
-- [`list`](/supawho/commands/list/)
+- [`whoami`](/commands/whoami/) — confirm which email an account maps to
+- [`list`](/commands/list/)

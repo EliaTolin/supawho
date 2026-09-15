@@ -12,7 +12,7 @@ supawho add <name> <token>
 ```
 
 - `<name>` — a label you choose (e.g. `work`, `client-a`). May not contain commas or whitespace.
-- `<token>` — a Supabase access token, starting with `sbp_`. See [Getting started](/supawho/guides/getting-started/) for how to create one.
+- `<token>` — a Supabase access token, starting with `sbp_`. See [Getting started](/guides/getting-started/) for how to create one.
 
 ## Examples
 
@@ -37,5 +37,5 @@ supawho add
 
 ## See also
 
-- [`use`](/supawho/commands/use/) — switch to the account you just saved
-- [`rename`](/supawho/commands/rename/) · [`remove`](/supawho/commands/remove/)
+- [`use`](/commands/use/) — switch to the account you just saved
+- [`rename`](/commands/rename/) · [`remove`](/commands/remove/)

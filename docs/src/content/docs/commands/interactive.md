@@ -33,10 +33,10 @@ Logged in as 'another-project'.
 
 ## Behavior
 
-- If **no accounts** are saved yet, supawho starts a short guided flow to add your first one (see [`add`](/supawho/commands/add/)).
+- If **no accounts** are saved yet, supawho starts a short guided flow to add your first one (see [`add`](/commands/add/)).
 - An invalid selection prints `Invalid selection.` and exits with code `1`.
 
 ## See also
 
-- [`use`](/supawho/commands/use/) — switch to a specific account by name
-- [`list`](/supawho/commands/list/) — see saved accounts
+- [`use`](/commands/use/) — switch to a specific account by name
+- [`list`](/commands/list/) — see saved accounts

@@ -7,16 +7,16 @@ supawho has a small, focused command set. Each one has its own reference page wi
 
 | Command | Description |
 |---|---|
-| [`supawho`](/supawho/commands/interactive/) | Interactive account picker |
-| [`supawho add <name> <token>`](/supawho/commands/add/) | Save a new account |
-| [`supawho use <name>`](/supawho/commands/use/) | Switch to an account |
-| [`supawho list`](/supawho/commands/list/) | List saved accounts |
-| [`supawho whoami [name]`](/supawho/commands/whoami/) | Reveal the email + organizations behind each account |
-| [`supawho find <project-ref>`](/supawho/commands/find/) | Find which account owns a project |
-| [`supawho rename <old> <new>`](/supawho/commands/rename/) | Rename a saved account |
-| [`supawho remove <name>`](/supawho/commands/remove/) | Delete an account |
-| [`supawho upgrade`](/supawho/commands/upgrade/) | Update to the latest version |
-| [`supawho version`](/supawho/commands/version/) | Print the installed version |
+| [`supawho`](/commands/interactive/) | Interactive account picker |
+| [`supawho add <name> <token>`](/commands/add/) | Save a new account |
+| [`supawho use <name>`](/commands/use/) | Switch to an account |
+| [`supawho list`](/commands/list/) | List saved accounts |
+| [`supawho whoami [name]`](/commands/whoami/) | Reveal the email + organizations behind each account |
+| [`supawho find <project-ref>`](/commands/find/) | Find which account owns a project |
+| [`supawho rename <old> <new>`](/commands/rename/) | Rename a saved account |
+| [`supawho remove <name>`](/commands/remove/) | Delete an account |
+| [`supawho upgrade`](/commands/upgrade/) | Update to the latest version |
+| [`supawho version`](/commands/version/) | Print the installed version |
 
 ## Conventions
 

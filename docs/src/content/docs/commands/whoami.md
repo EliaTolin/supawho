@@ -40,5 +40,5 @@ supawho whoami client-a
 
 ## See also
 
-- [`find`](/supawho/commands/find/) — the reverse lookup: which account owns a project?
-- [How it works](/supawho/guides/how-it-works/)
+- [`find`](/commands/find/) — the reverse lookup: which account owns a project?
+- [How it works](/guides/how-it-works/)

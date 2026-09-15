@@ -19,4 +19,4 @@ supawho 1.6.0
 
 ## See also
 
-- [`upgrade`](/supawho/commands/upgrade/) — update to the latest version
+- [`upgrade`](/commands/upgrade/) — update to the latest version
