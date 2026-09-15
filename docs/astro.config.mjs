@@ -4,7 +4,9 @@ import starlight from '@astrojs/starlight';
 
 // Served at the root of its own domain. SITE_URL is baked in at build time
 // (see Dockerfile) and feeds canonical URLs, the sitemap and the JSON-LD.
-const site = process.env.SITE_URL ?? 'https://v4kykt8per6jxu3vc5zkm0q9.auroradigital.it';
+// `||`, not `??`: the Dockerfile's ARG leaves SITE_URL as an empty string when
+// no build argument is passed, and an empty `site` fails the config check.
+const site = process.env.SITE_URL || 'https://v4kykt8per6jxu3vc5zkm0q9.auroradigital.it';
 
 export default defineConfig({
 	site,
