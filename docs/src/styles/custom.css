@@ -1,0 +1,156 @@
+/* supawho docs — themed after the Supabase design system
+   (brand green #3fcf8e, warm near-black scale, Inter + Source Code Pro) */
+
+:root {
+	--sl-font: 'Inter Variable', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	--sl-font-mono: 'Source Code Pro Variable', 'Source Code Pro', Menlo, monospace;
+
+	/* Radius (Supabase: 8px lg / 4px sm) */
+	--sl-border-radius: 8px;
+}
+
+/* --- Dark theme (Supabase default look) --- */
+:root {
+	--sb-bg: #1c1c1c;
+	--sb-surface: #1c1c1c;
+	--sb-surface-2: #232323;
+	--sb-green: #3fcf8e;
+	--sb-green-dim: #24b47e;
+
+	--sl-color-accent-low: #113123;
+	--sl-color-accent: #1d724c;
+	--sl-color-accent-high: #85e0b7;
+	--sl-color-text-accent: #3fcf8e;
+
+	--sl-color-white: #ededed;
+	--sl-color-gray-1: #d6d6d6;
+	--sl-color-gray-2: #bbbbbb;
+	--sl-color-gray-3: #7e7e7e;
+	--sl-color-gray-4: #505050;
+	--sl-color-gray-5: #2e2e2e;
+	--sl-color-gray-6: #232323;
+	--sl-color-gray-7: #1f1f1f;
+	--sl-color-black: #161616;
+
+	--sl-color-bg: #1c1c1c;
+	--sl-color-bg-nav: #161616;
+	--sl-color-bg-sidebar: #181818;
+	--sl-color-hairline-shade: #282828;
+}
+
+/* Brand wordmark in the header */
+.site-title {
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+/* --- WOW hero --- */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* --- Hero: centered, restrained, Supabase-flavored --- */
+.hero {
+	grid-template-columns: 1fr;
+	justify-items: center;
+	text-align: center;
+	gap: 1.5rem;
+	padding-block: 2rem 1rem;
+}
+.hero > .hero-html {
+	order: -1;
+	justify-content: center;
+}
+.hero img {
+	width: 96px;
+	height: auto;
+	margin: 0 auto;
+}
+.hero .stack {
+	align-items: center;
+	gap: 1.25rem;
+}
+.hero .copy {
+	align-items: center;
+	max-width: 44ch;
+}
+.hero h1 {
+	font-size: clamp(2rem, 4.5vw, 2.9rem);
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	line-height: 1.1;
+	max-width: 18ch;
+	text-wrap: balance;
+}
+.hero .tagline {
+	color: var(--sl-color-gray-2);
+	font-size: 1.125rem;
+	line-height: 1.6;
+	max-width: 46ch;
+}
+.hero .actions {
+	justify-content: center;
+	gap: 0.75rem;
+}
+/* Buttons — solid green primary, hairline-bordered secondary (Supabase) */
+.hero .actions a.primary,
+.hero .actions a.primary:hover {
+	background: var(--sb-green);
+	border-color: var(--sb-green);
+	color: #06170e;
+}
+.hero .actions a.primary:hover {
+	filter: brightness(1.06);
+}
+.hero .actions a.minimal {
+	border: 1px solid var(--sl-color-gray-5);
+	color: var(--sl-color-white);
+}
+.hero .actions a.minimal:hover {
+	background: var(--sl-color-gray-6);
+}
+
+/* Install command chip, centered under the hero */
+.hx-install {
+	display: table;
+	margin: 1.75rem auto 0;
+	font-family: var(--sl-font-mono);
+	font-size: 0.85rem;
+	background: var(--sl-color-gray-7);
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 8px;
+	padding: 9px 16px;
+	color: var(--sl-color-gray-2);
+}
+.hx-dollar {
+	color: var(--sb-green);
+	margin-right: 8px;
+	user-select: none;
+}
+
+/* Terminal — the product shot, centered */
+.term {
+	max-width: 720px;
+	margin: 2rem auto 0;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 10px;
+	overflow: hidden;
+	background: #171717;
+}
+.term img,
+.term svg {
+	display: block;
+	width: 100%;
+}
+
+.hero .tagline {
+	max-width: 46ch;
+}
