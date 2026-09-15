@@ -1,0 +1,21 @@
+---
+// SoftwareApplication JSON-LD for the landing page. The canonical URL comes
+// from `site` in astro.config.mjs so it follows the deployment, and is never
+// hardcoded to a single domain.
+const data = {
+	'@context': 'https://schema.org',
+	'@type': 'SoftwareApplication',
+	name: 'supawho',
+	applicationCategory: 'DeveloperApplication',
+	operatingSystem: 'macOS, Linux, Windows',
+	description:
+		'Free, open-source CLI to manage and switch between multiple Supabase accounts. Access tokens are stored in the OS secret vault, never on disk.',
+	url: new URL('/', Astro.site).href,
+	downloadUrl: 'https://github.com/EliaTolin/supawho/releases',
+	license: 'https://github.com/EliaTolin/supawho/blob/main/LICENSE',
+	author: { '@type': 'Person', name: 'Elia Tolin' },
+	offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(data)} is:inline />

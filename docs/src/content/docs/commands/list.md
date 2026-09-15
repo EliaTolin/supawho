@@ -27,9 +27,9 @@ Saved accounts:
 ## Behavior
 
 - With no accounts saved, it tells you how to add one.
-- `list` shows only names — to see the email or organization behind each, use [`whoami`](/supawho/commands/whoami/).
+- `list` shows only names — to see the email or organization behind each, use [`whoami`](/commands/whoami/).
 
 ## See also
 
-- [`whoami`](/supawho/commands/whoami/) — names plus emails and organizations
-- [`add`](/supawho/commands/add/)
+- [`whoami`](/commands/whoami/) — names plus emails and organizations
+- [`add`](/commands/add/)

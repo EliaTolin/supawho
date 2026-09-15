@@ -30,4 +30,4 @@ The right command depends on how you installed supawho:
 | Install script / raw binary | `supawho upgrade` |
 | `.deb` / `.rpm` / `.apk` (Linux) | your system package manager |
 
-[`supawho upgrade`](/supawho/commands/upgrade/) downloads the latest release, verifies its SHA-256 checksum, and swaps the binary in place. If it detects a package-manager install, it won't fight it — it points you to the right command instead.
+[`supawho upgrade`](/commands/upgrade/) downloads the latest release, verifies its SHA-256 checksum, and swaps the binary in place. If it detects a package-manager install, it won't fight it — it points you to the right command instead.

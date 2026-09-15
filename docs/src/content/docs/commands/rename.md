@@ -29,4 +29,4 @@ Account 'old-gig' renamed to 'acme'.
 
 ## See also
 
-- [`add`](/supawho/commands/add/) · [`remove`](/supawho/commands/remove/) · [`list`](/supawho/commands/list/)
+- [`add`](/commands/add/) · [`remove`](/commands/remove/) · [`list`](/commands/list/)

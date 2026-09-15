@@ -2,10 +2,12 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
-// Project site on GitHub Pages (custom domain): https://www.eliatolin.it/supawho
+// Served at the root of its own domain. SITE_URL is baked in at build time
+// (see Dockerfile) and feeds canonical URLs, the sitemap and the JSON-LD.
+const site = process.env.SITE_URL ?? 'https://v4kykt8per6jxu3vc5zkm0q9.auroradigital.it';
+
 export default defineConfig({
-	site: 'https://www.eliatolin.it',
-	base: '/supawho',
+	site,
 	integrations: [
 		starlight({
 			title: 'supawho',

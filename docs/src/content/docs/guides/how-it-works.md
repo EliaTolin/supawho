@@ -17,7 +17,7 @@ side-project  → sbp_••••••••
 
 ## Switching = driving the Supabase CLI
 
-When you run [`supawho use work`](/supawho/commands/use/), supawho reads that account's token from the vault and runs:
+When you run [`supawho use work`](/commands/use/), supawho reads that account's token from the vault and runs:
 
 ```bash
 supabase login --token <token>
@@ -27,7 +27,7 @@ So supawho never reimplements authentication — it drives the Supabase CLI you 
 
 ## Identity lookups use the Management API
 
-[`whoami`](/supawho/commands/whoami/) and [`find`](/supawho/commands/find/) call the **Supabase Management API** with each account's token:
+[`whoami`](/commands/whoami/) and [`find`](/commands/find/) call the **Supabase Management API** with each account's token:
 
 - `GET /v1/profile` → the account's email
 - `GET /v1/organizations` → organization names
@@ -43,4 +43,4 @@ These are read-only calls, used only when you run those commands.
 | Account names | OS secret vault |
 | Anything on disk | Nothing — no config files, no plain-text tokens |
 
-More on the security model in [Security](/supawho/guides/security/).
+More on the security model in [Security](/guides/security/).

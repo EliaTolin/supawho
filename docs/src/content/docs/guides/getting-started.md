@@ -64,4 +64,4 @@ supawho add work sbp_your_token   # save an account (once)
 supawho use work                  # switch to it in a second
 ```
 
-Run `supawho` with no arguments for an interactive picker, or head to the [Commands](/supawho/commands/) page for the full reference.
+Run `supawho` with no arguments for an interactive picker, or head to the [Commands](/commands/) page for the full reference.

@@ -43,4 +43,4 @@ supawho was installed via Homebrew (run: brew upgrade supawho).
 
 ## Related
 
-Set `SUPAWHO_NO_UPDATE_CHECK=1` to disable the background update notice. See [Updating](/supawho/guides/updating/) for the full picture.
+Set `SUPAWHO_NO_UPDATE_CHECK=1` to disable the background update notice. See [Updating](/guides/updating/) for the full picture.
