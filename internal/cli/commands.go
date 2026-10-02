@@ -187,6 +187,9 @@ func (a *App) Whoami(name string) error {
 			fmt.Fprintf(tw, "%s\t(%v)\t\n", n, err)
 			continue
 		}
+		if email == "" {
+			email = "(unavailable)"
+		}
 		fmt.Fprintf(tw, "%s\t%s\t%s\n", n, email, strings.Join(orgs, ", "))
 	}
 	return tw.Flush()

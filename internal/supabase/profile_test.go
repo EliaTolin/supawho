@@ -78,3 +78,29 @@ func TestWhoamiOrgsBestEffort(t *testing.T) {
 		t.Fatalf("got %+v", id)
 	}
 }
+
+// A token that /v1/profile rejects with 403 but that can list organizations
+// still resolves to its organizations.
+func TestWhoamiProfileForbidden(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v1/profile", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	})
+	mux.HandleFunc("/v1/organizations", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`[{"name":"Acme"}]`))
+	})
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	orig := apiBase
+	apiBase = srv.URL
+	defer func() { apiBase = orig }()
+
+	id, err := Whoami("tok")
+	if err != nil {
+		t.Fatalf("profile 403 should not fail Whoami when orgs resolve: %v", err)
+	}
+	if id.Email != "" || len(id.Orgs) != 1 || id.Orgs[0] != "Acme" {
+		t.Fatalf("got %+v", id)
+	}
+}

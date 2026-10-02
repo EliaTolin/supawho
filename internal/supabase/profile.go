@@ -26,9 +26,7 @@ func Whoami(token string) (Identity, error) {
 		PrimaryEmail string `json:"primary_email"`
 		Username     string `json:"username"`
 	}
-	if err := getJSON(client, token, "/v1/profile", &profile); err != nil {
-		return Identity{}, err
-	}
+	profileErr := getJSON(client, token, "/v1/profile", &profile)
 
 	id := Identity{Email: profile.PrimaryEmail}
 	if id.Email == "" {
@@ -43,6 +41,12 @@ func Whoami(token string) (Identity, error) {
 		for _, o := range orgs {
 			id.Orgs = append(id.Orgs, o.Name)
 		}
+	}
+
+	// Some tokens get a 403 from /v1/profile yet can list organizations, so a
+	// profile error only fails the lookup when there's nothing else to show.
+	if profileErr != nil && len(id.Orgs) == 0 {
+		return Identity{}, profileErr
 	}
 	return id, nil
 }
