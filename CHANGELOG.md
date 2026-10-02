@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.1](https://github.com/EliaTolin/supawho/compare/v1.6.0...v1.6.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **install:** parse checksum from MatchInfo.Line in install.ps1 ([#19](https://github.com/EliaTolin/supawho/issues/19)) ([53523c0](https://github.com/EliaTolin/supawho/commit/53523c06c15dc036e9ce72080409cc80849c78aa)), closes [#15](https://github.com/EliaTolin/supawho/issues/15)
+* **whoami:** show organizations when /v1/profile is forbidden ([#20](https://github.com/EliaTolin/supawho/issues/20)) ([a007a2f](https://github.com/EliaTolin/supawho/commit/a007a2f1b7879cdf2a0db10e268975bb389827d3)), closes [#16](https://github.com/EliaTolin/supawho/issues/16)
+
 ## [1.6.0](https://github.com/EliaTolin/supawho/compare/v1.5.0...v1.6.0) (2026-07-21)
 
 
