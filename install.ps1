@@ -42,7 +42,7 @@ try {
   try {
     Invoke-WebRequest "$baseUrl/checksums.txt" -OutFile "$tmp\checksums.txt"
     $expected = (Select-String -Path "$tmp\checksums.txt" -Pattern ([regex]::Escape($archive)) |
-      ForEach-Object { ($_ -split '\s+')[0] } | Select-Object -First 1)
+      ForEach-Object { ($_.Line -split '\s+')[0] } | Select-Object -First 1)
     if ($expected) {
       $actual = (Get-FileHash "$tmp\$archive" -Algorithm SHA256).Hash.ToLower()
       if ($actual -ne $expected.ToLower()) { throw "Checksum mismatch - aborting." }
