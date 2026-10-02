@@ -37,6 +37,7 @@ supawho whoami client-a
 
 - Queries the Supabase Management API (`/v1/profile` and `/v1/organizations`) with each account's token.
 - A revoked or invalid token is reported on its own row without failing the rest.
+- If a token can't read its profile but can list organizations, the row shows them with `(unavailable)` as the email.
 
 ## See also
 

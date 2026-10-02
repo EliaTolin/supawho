@@ -295,6 +295,20 @@ func TestWhoamiHandlesPerAccountError(t *testing.T) {
 	}
 }
 
+func TestWhoamiEmailUnavailable(t *testing.T) {
+	h := newHarness("")
+	_ = h.st.Add("proj-a", "tok_a")
+	h.app.Profile = func(string) (string, []string, error) {
+		return "", []string{"Org A"}, nil
+	}
+	if code := h.app.Run([]string{"whoami"}); code != 0 {
+		t.Fatalf("exit = %d", code)
+	}
+	if out := h.out.String(); !strings.Contains(out, "(unavailable)") || !strings.Contains(out, "Org A") {
+		t.Fatalf("output = %q", out)
+	}
+}
+
 func TestFindByRef(t *testing.T) {
 	h := newHarness("")
 	_ = h.st.Add("work", "tok_work")
