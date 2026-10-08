@@ -21,6 +21,9 @@ const (
 // ErrNotFound is returned by a backend when a key does not exist.
 var ErrNotFound = errors.New("not found")
 
+// ErrExists is returned by Rename when the new name is already saved.
+var ErrExists = errors.New("already exists")
+
 // backend is the low-level secret key/value store (service is fixed per backend).
 type backend interface {
 	get(key string) (string, error) // returns ErrNotFound if the key is missing
@@ -76,7 +79,8 @@ func (s *Store) Add(name, token string) error {
 }
 
 // Rename moves the token from oldName to newName and updates the index in place.
-// Returns ErrNotFound if oldName does not exist.
+// Returns ErrNotFound if oldName does not exist, or ErrExists if newName is
+// already saved.
 func (s *Store) Rename(oldName, newName string) error {
 	token, err := s.b.get(oldName)
 	if errors.Is(err, ErrNotFound) {
@@ -85,6 +89,13 @@ func (s *Store) Rename(oldName, newName string) error {
 	if err != nil {
 		return err
 	}
+	names, err := s.List()
+	if err != nil {
+		return err
+	}
+	if oldName != newName && contains(names, newName) {
+		return ErrExists
+	}
 	if err := s.b.set(newName, token); err != nil {
 		return err
 	}
@@ -92,10 +103,6 @@ func (s *Store) Rename(oldName, newName string) error {
 		if err := s.b.delete(oldName); err != nil {
 			return err
 		}
-	}
-	names, err := s.List()
-	if err != nil {
-		return err
 	}
 	for i, n := range names {
 		if n == oldName {

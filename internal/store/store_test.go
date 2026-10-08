@@ -90,6 +90,41 @@ func TestRenameMissing(t *testing.T) {
 	}
 }
 
+func TestRenameOntoExisting(t *testing.T) {
+	s := NewMemory()
+	_ = s.Add("a", "1")
+	_ = s.Add("b", "2")
+
+	if err := s.Rename("b", "a"); !errors.Is(err, ErrExists) {
+		t.Fatalf("Rename onto existing err = %v, want ErrExists", err)
+	}
+	if got := mustList(t, s); !reflect.DeepEqual(got, []string{"a", "b"}) {
+		t.Fatalf("list = %v, want [a b]", got)
+	}
+	// neither token touched
+	if tok, _ := s.Get("a"); tok != "1" {
+		t.Fatalf("Get(a) = %q, want 1", tok)
+	}
+	if tok, _ := s.Get("b"); tok != "2" {
+		t.Fatalf("Get(b) = %q, want 2", tok)
+	}
+}
+
+func TestRenameSameName(t *testing.T) {
+	s := NewMemory()
+	_ = s.Add("a", "1")
+
+	if err := s.Rename("a", "a"); err != nil {
+		t.Fatalf("Rename to same name: %v", err)
+	}
+	if got := mustList(t, s); !reflect.DeepEqual(got, []string{"a"}) {
+		t.Fatalf("list = %v, want [a]", got)
+	}
+	if tok, _ := s.Get("a"); tok != "1" {
+		t.Fatalf("Get(a) = %q, want 1", tok)
+	}
+}
+
 func TestRemove(t *testing.T) {
 	s := NewMemory()
 	_ = s.Add("a", "1")
