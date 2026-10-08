@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.2](https://github.com/EliaTolin/supawho/compare/v1.6.1...v1.6.2) (2026-10-08)
+
+
+### Bug Fixes
+
+* **rename:** refuse to rename onto an existing account ([#22](https://github.com/EliaTolin/supawho/issues/22)) ([7f737bd](https://github.com/EliaTolin/supawho/commit/7f737bd7a11607b27da553f310d146099384f588))
+
 ## [1.6.1](https://github.com/EliaTolin/supawho/compare/v1.6.0...v1.6.1) (2026-10-02)
 
 
