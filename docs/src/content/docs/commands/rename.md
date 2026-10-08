@@ -26,6 +26,7 @@ Account 'old-gig' renamed to 'acme'.
 - Run `rename` with missing arguments to pick the account and enter the new name interactively.
 - The new name may not contain commas or whitespace.
 - Renaming a name that doesn't exist prints `Account '<old>' not found.` and exits with code `1`.
+- Renaming to another saved account's name prints `Account '<new>' already exists.` and exits with code `1`. Both accounts are left untouched.
 
 ## See also
 

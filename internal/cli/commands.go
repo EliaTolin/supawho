@@ -106,6 +106,10 @@ func (a *App) Rename(oldName, newName string) error {
 		fmt.Fprintf(a.Out, "Account '%s' not found.\n", oldName)
 		return errHandled
 	}
+	if errors.Is(err, store.ErrExists) {
+		fmt.Fprintf(a.Out, "Account '%s' already exists.\n", newName)
+		return errHandled
+	}
 	if err != nil {
 		return err
 	}

@@ -149,6 +149,18 @@ func TestRenameMissing(t *testing.T) {
 	}
 }
 
+func TestRenameOntoExisting(t *testing.T) {
+	h := newHarness("")
+	_ = h.st.Add("a", "1")
+	_ = h.st.Add("b", "2")
+	if code := h.app.Run([]string{"rename", "b", "a"}); code != 1 {
+		t.Fatalf("exit = %d, want 1", code)
+	}
+	if !strings.Contains(h.out.String(), "Account 'a' already exists.") {
+		t.Fatalf("output = %q", h.out.String())
+	}
+}
+
 func TestInteractiveSelect(t *testing.T) {
 	h := newHarness("2\n")
 	_ = h.st.Add("a", "tok_a")
