@@ -19,3 +19,17 @@ func (u *UI) Banner() {
 	}
 	fmt.Fprintf(u.w, "\n     🔍 %s\n\n", u.paint(dim, "Who are you today?"))
 }
+
+// BannerGradient prints the banner with the logo on a Supabase green → cyan
+// gradient. Without color it is identical to Banner.
+func (u *UI) BannerGradient() {
+	if u.level == LevelNone {
+		u.Banner()
+		return
+	}
+	fmt.Fprintln(u.w)
+	for _, line := range logo {
+		fmt.Fprintln(u.w, u.Gradient(line, SupaGreen, Cyan))
+	}
+	fmt.Fprintf(u.w, "\n     🔍 %s\n\n", u.paint(dim, "Who are you today?"))
+}
