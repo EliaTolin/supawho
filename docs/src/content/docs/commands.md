@@ -1,6 +1,6 @@
 ---
 title: Commands overview
-description: Every supawho command at a glance — add, use, list, whoami, find, rename, remove, upgrade and version — with links to each command's reference page.
+description: Every supawho command at a glance — add, use, list, whoami, find, doctor, rename, remove, upgrade and version — with links to each command's reference page.
 ---
 
 supawho has a small, focused command set. Each one has its own reference page with syntax, examples and exit codes.
@@ -13,6 +13,7 @@ supawho has a small, focused command set. Each one has its own reference page wi
 | [`supawho list`](/commands/list/) | List saved accounts |
 | [`supawho whoami [name]`](/commands/whoami/) | Reveal the email + organizations behind each account |
 | [`supawho find <project-ref>`](/commands/find/) | Find which account owns a project |
+| [`supawho doctor [name]`](/commands/doctor/) | Check token validity and system health |
 | [`supawho rename <old> <new>`](/commands/rename/) | Rename a saved account |
 | [`supawho remove <name>`](/commands/remove/) | Delete an account |
 | [`supawho upgrade`](/commands/upgrade/) | Update to the latest version |
