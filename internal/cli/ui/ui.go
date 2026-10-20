@@ -10,11 +10,8 @@ package ui
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"text/tabwriter"
-
-	"golang.org/x/term"
 )
 
 const (
@@ -29,21 +26,23 @@ const (
 // UI renders styled status lines to a fixed writer.
 type UI struct {
 	w     io.Writer
-	color bool
+	level Level
 }
 
-// New builds a UI, enabling color only for real terminals without NO_COLOR.
+// New builds a UI whose color level is detected from w and the environment.
 func New(w io.Writer) *UI {
-	return &UI{w: w, color: colorEnabled(w)}
+	return &UI{w: w, level: detectLevel(w)}
 }
 
-func colorEnabled(w io.Writer) bool {
-	if os.Getenv("NO_COLOR") != "" {
-		return false
-	}
-	f, ok := w.(*os.File)
-	return ok && term.IsTerminal(int(f.Fd()))
+// NewWithLevel builds a UI with an explicit color level (tests, renderers).
+func NewWithLevel(w io.Writer, l Level) *UI {
+	return &UI{w: w, level: l}
 }
+
+// Level reports the color depth this UI renders with.
+func (u *UI) Level() Level { return u.level }
+
+func colorEnabled(w io.Writer) bool { return detectLevel(w) != LevelNone }
 
 // colorize wraps s in an ANSI code when on, otherwise returns it unchanged.
 func colorize(on bool, code, s string) string {
@@ -54,7 +53,7 @@ func colorize(on bool, code, s string) string {
 }
 
 // paint colors s when this UI has color enabled.
-func (u *UI) paint(code, s string) string { return colorize(u.color, code, s) }
+func (u *UI) paint(code, s string) string { return colorize(u.level != LevelNone, code, s) }
 
 // OK prints a success line: a green check plus the message.
 func (u *UI) OK(format string, a ...any) {
