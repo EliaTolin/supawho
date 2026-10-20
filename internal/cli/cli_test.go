@@ -456,6 +456,7 @@ const wantHelp = "\n" +
 	"  supawho use <name>             Login with specific account\n" +
 	"  supawho whoami [name]          Show the email behind each account\n" +
 	"  supawho find <project-ref>     Find which account owns a project\n" +
+	"  supawho doctor [name]          Check token validity and system health\n" +
 	"  supawho upgrade                Update supawho to the latest version\n" +
 	"  supawho version                Show version\n" +
 	"\n" +

@@ -39,3 +39,12 @@ func NewFailing(err error) *Store {
 func (b *failBackend) get(string) (string, error) { return "", b.err }
 func (b *failBackend) set(string, string) error   { return b.err }
 func (b *failBackend) delete(string) error        { return b.err }
+
+// NewMemoryWithOrphans returns an in-memory Store whose index already lists
+// orphans without a stored token, simulating secrets that vanished from the
+// OS store. For tests only.
+func NewMemoryWithOrphans(orphans ...string) *Store {
+	s := NewMemory()
+	_ = s.saveList(orphans)
+	return s
+}

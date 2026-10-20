@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/EliaTolin/supawho/internal/cli/ui"
 	"github.com/EliaTolin/supawho/internal/store"
@@ -47,10 +48,20 @@ type App struct {
 	Out     io.Writer
 	Version string
 
+	// Doctor probes. ActiveToken reports the token the supabase CLI uses and
+	// where it came from; CLIInfo locates the CLI; Latest returns the newest
+	// supawho release without the leading "v".
+	ActiveToken func() (token, source string, err error)
+	CLIInfo     func() (path, version string, err error)
+	Latest      func(ctx context.Context) (string, error)
+
 	// UI and Prompt handle presentation and interactive input. Both default
 	// from In/Out on first Run, so tests only need to set In/Out.
 	UI     *ui.UI
 	Prompt ui.Prompter
+
+	// now times the token checks; defaults to time.Now.
+	now func() time.Time
 }
 
 // errHandled signals a user-facing failure whose message was already printed;
@@ -82,6 +93,8 @@ func (a *App) Run(args []string) int {
 		err = a.Whoami(arg(args, 1))
 	case "find", "locate":
 		err = a.Find(arg(args, 1))
+	case "doctor", "check":
+		err = a.Doctor(args[1:])
 	case "upgrade", "update":
 		err = a.runUpgrade()
 	case "version", "--version", "-v":
