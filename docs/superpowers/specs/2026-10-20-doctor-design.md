@@ -1,192 +1,194 @@
-# `supawho doctor` — design
+# Design: comando `supawho doctor`
 
-Date: 2026-10-20 · Branch: `feat/doctor` (from `main`)
+Data: 2026-10-20 · Stato: in revisione
 
-## Goal
+## Obiettivo
 
-A read-only health check that tells the user, in one command, whether their
-saved access tokens still work and whether the supawho setup around them is
-sound. Used by hand (readable report) and by scripts/CI (`--json` + exit code).
+supawho salva più token Supabase nel keyring di sistema, ma oggi non c'è un modo unico per sapere:
 
-Non-goals: automatic repair, colored/styled output (the pending UI refactor in
-`stash@{0}` / `internal/cli/ui/` stays parked), offline mode.
+- quali token sono ancora validi e quali sono scaduti o revocati (`whoami` mostra l'errore ma esce sempre con 0);
+- se l'ambiente è integro: Supabase CLI installata, token in uso dalla CLI corrispondente a un account salvato, supawho aggiornato.
 
-## Command
+`doctor` risponde a entrambe le domande con un solo comando, sia per l'uso interattivo sia per script/CI (`--json` + exit code).
 
-```
-supawho doctor [account] [--json]
-```
+**Criterio di successo:** con un comando si vede quali account vanno ri-aggiunti o rimossi e cosa sistemare nell'ambiente, ciascun problema accompagnato dal comando da lanciare.
 
-- `account` (optional) restricts the token checks to that account. The system
-  checks always run. An unknown account prints
-  `Account '<name>' not found. Run 'supawho list' to see saved accounts.` and
-  exits 1 (same wording as `whoami`).
-- `--json` may appear before or after `account`.
-- Exit code: `1` if at least one check has status `fail`, otherwise `0`.
-  `warn` never fails the command.
+**Fuori ambito:** correzioni automatiche (`--fix`), modifiche al menu interattivo.
 
-## Checks
+## 1. Comportamento
 
-Checks run in this order and are reported in this order.
+**Sintassi:** `supawho doctor [nome] [--json]` (alias `check`).
 
-| Group | Name | ok | warn | fail |
-|---|---|---|---|---|
-| `keyring` | `keyring` | index read succeeds | — | backend error reading the index |
-| `index` | `index` | every name has a token; no duplicates; all names valid | index empty ("no accounts saved") | name without token, duplicate names, or names that fail `validateName` (detail lists them) |
-| `network` | `api.supabase.com` | host answers any HTTP status | — | request error / timeout |
-| `token` | `<account>` (one per account) | `GET /v1/organizations` → 200 | 403 ("token has limited scope"), or network error/timeout ("could not verify") | 401 ("invalid or revoked") |
-| `tool` | `supabase cli` | installed and latest | newer release available, or latest version unknown | binary not in `PATH` |
-| `tool` | `supawho` | current is latest | newer release available, or latest version unknown, or running a dev build | — |
+- Senza argomenti: tutti gli account salvati + controlli di sistema.
+- Con `nome`: solo quell'account + controlli di sistema. Nome inesistente → messaggio d'errore, exit 1.
+- Argomenti sconosciuti (es. `--foo`) → usage, exit 1.
+- Solo diagnosi: nessuna scrittura su keyring, file o CLI.
+- `doctor` è escluso da `updater.MaybeNotify` in `main.go` (fa già il proprio controllo versione).
 
-Rules:
+### Controlli e classificazione
 
-- If `keyring` fails, `index` and all `token` checks are skipped and reported
-  as `warn` with detail `skipped: keyring unavailable`.
-- If `network` fails, `token` checks and the "latest version" part of the
-  `tool` checks are reported as `warn` with detail `skipped: no network`. The
-  `supabase cli` presence check still runs (it is local).
-- Token checks for a name already reported as "missing token" by `index` are
-  reported as `fail` with detail `no token stored`, and no request is made.
-- Token checks run concurrently, each with a 10s timeout; results are emitted
-  in index order.
-- Every `fail`/`warn` detail ends with a remediation hint where one exists:
-  - invalid token → `run 'supawho add <name> <new-token>'`
-  - missing token → `run 'supawho remove <name>' or re-add it`
-  - supabase CLI missing → `install it: https://supabase.com/docs/guides/cli`
-  - supabase CLI outdated → `update it: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli`
-  - supawho outdated → `run 'supawho upgrade'`
-- Known limitation: tokens stored in the keyring but missing from the index
-  ("orphans") cannot be detected, because the keyring API cannot enumerate
-  keys. Documented, not checked.
+| Controllo | PASS | WARN | FAIL |
+|---|---|---|---|
+| Token di ogni account (`/v1/profile`, timeout 10s) | HTTP 200; detail = email, con latenza | errore di rete, 5xx, timeout → "could not verify" | 401 (`ErrUnauthorized`) → hint `supawho remove <n>` poi `supawho add <n>`; nome nell'indice ma token assente nel keyring (`store.ErrNotFound`) → stesso hint |
+| Supabase CLI | nel PATH; detail = versione + percorso | — | non trovata → hint con URL di installazione |
+| Account attivo | token attivo == token di un account salvato; detail = nome + sorgente (`env`/`keychain`/`file`) | token attivo non salvato in supawho; nessun login (`ErrNoActiveToken`); sorgente illeggibile | token attivo coincide con un account risultato FAIL → hint `supawho use <altro>` |
+| Versione supawho | aggiornata | release più recente → hint `supawho upgrade`; check fallito; versione non semver (`dev`) → "skipped" | — |
 
-## Architecture (approach A)
+Con `doctor <nome>` il controllo "Account attivo" confronta comunque con tutti i token salvati (lettura dal keyring, senza chiamate HTTP), ma può dare FAIL solo se l'account attivo è quello controllato e risulta invalido.
 
-Doctor lives in the `cli` package, alongside `whoami` and `find`, and gets its
-outside world through injectable functions on `App`, like those commands do.
+**Exit code:** 1 se esiste almeno un FAIL, altrimenti 0. I WARN non influenzano l'exit code.
 
-### `internal/supabase`
+**Sicurezza:** nessun token viene stampato, loggato o incluso nel JSON. Il token attivo è confrontato solo in memoria.
 
-- `profile.go`: add sentinels `ErrUnauthorized` (401) and `ErrForbidden` (403),
-  returned by `getJSON`. `ErrUnauthorized`'s message stays
-  `token is invalid or revoked`, so existing `whoami` output is unchanged.
-- `profile.go`: `func Validate(token string) error` — single
-  `GET /v1/organizations`, 10s client timeout, returns `nil`,
-  `ErrUnauthorized`, `ErrForbidden`, or a transport/status error.
-- `profile.go`: `func Ping() error` — unauthenticated `GET` to `apiBase`, 5s
-  timeout; any HTTP response is success.
-- `version.go` (new): `func CLIVersion() (string, error)` — runs
-  `supabase --version`, reads **stdout only** (the CLI prints its own update
-  notice on stderr), returns the trimmed first line. Missing binary returns an
-  error wrapping `exec.ErrNotFound`.
+## 2. Output
 
-### `internal/updater`
+Un unico modello dati (`report`) alimenta tre renderer, scelti automaticamente.
 
-- Add `FetchLatestFor(ctx, client, repo string) (*Release, error)` where
-  `repo` is `"owner/name"`. `FetchLatest` becomes a thin wrapper over it with
-  supawho's repo, so `upgrade` and the update notice are unchanged.
-- Reuse `IsNewer` for both version comparisons.
+### 2.1 Fancy (TTY con colore)
 
-### `internal/cli`
+Vincolo: solo sequenze ANSI in scrittura, mai query al terminale (evita byte spuri sul prompt).
 
-`App` gains:
+- Header: logo `supawho` con gradiente verde Supabase → ciano, sottotitolo `🩺 doctor · checking N accounts`.
+- Sezioni `🔑 Accounts` e `🧰 System` con separatore sfumato.
+- Righe account: spinner braille (80ms) poi riscrittura sul posto con il risultato. Check in parallelo (max 4), ma **ogni riga occupa una posizione fissa nell'ordine di `Store.List`**.
+- Badge a sfondo pieno: ` PASS ` bianco su verde, ` WARN ` nero su giallo, ` FAIL ` bianco su rosso. Nome in bold, email in ciano, latenza in dim.
+- Hint su riga sottostante: `↳` magenta + comando evidenziato.
+- Box finale arrotondato con health score e barra: rossa < 50%, gialla 50–85%, verde > 85%. A 100%: `✨ All systems healthy — you're good to go!`.
+- Cursore nascosto durante lo spinner (`\033[?25l`), sempre ripristinato: `defer` + handler SIGINT.
+- Profondità colore: truecolor se `COLORTERM` ∈ {`truecolor`, `24bit`}, altrimenti 256 colori.
 
-```go
-Validate    func(token string) error             // token check
-Ping        func() error                          // network check
-ToolVersion func() (string, error)                // installed supabase CLI version
-Latest      func(repo string) (string, error)     // latest release tag on GitHub
-```
+**Score:** `round((pass + 0.5·warn) / totale × 100)`. I check di sistema sono sempre 3, quindi il totale non è mai 0; per robustezza la funzione restituisce comunque 100 con totale 0.
 
-Any nil function makes its check report `warn` with `not available in this
-build`, so tests and partial builds never panic.
+### 2.2 Plain (no TTY, `NO_COLOR`, pipe, test)
 
-`doctor.go` (new):
-
-```go
-type Check struct {
-    Group  string `json:"group"`
-    Name   string `json:"name"`
-    Status string `json:"status"` // "ok" | "warn" | "fail"
-    Detail string `json:"detail"`
-}
-
-func (a *App) runChecks(account string) []Check
-func (a *App) Doctor(args []string) error
-```
-
-`Doctor` parses `[account] [--json]`, calls `runChecks`, renders, and returns
-`errHandled` when any check failed.
-
-`app.go`: dispatch `case "doctor":` → `a.Doctor(args[1:])`.
-`banner.go`: help line
-`supawho doctor [name] [--json]   Check tokens and setup health`.
-
-### `main.go`
-
-Wire `supabase.Validate`, `supabase.Ping`, `supabase.CLIVersion`, and a
-`Latest` closure over `updater.FetchLatestFor` (`supabase/cli` and supawho's
-repo) with a 10s timeout.
-
-## Output
-
-Text (default) — plain `tabwriter`, no colors, matching `whoami`:
+Niente banner, spinner, box né ANSI. Una riga per check, in ordine fisso:
 
 ```
-Running supawho doctor...
-CHECK             STATUS  DETAIL
-keyring           ok      OS secret store reachable
-index             ok      3 accounts, consistent
-api.supabase.com  ok      reachable
-token: work       ok      valid
-token: client-a   FAIL    invalid or revoked — run 'supawho add client-a <new-token>'
-token: client-b   warn    could not verify (timeout)
-supabase cli      warn    2.98.2 installed, 2.121.0 available — update it: https://...
-supawho           ok      1.6.2 (latest)
+Accounts
+PASS  acme        mario@acme.it  142ms
+FAIL  old-client  token is invalid or revoked
+      -> supawho remove old-client
+System
+PASS  Supabase CLI    2.48.3 /opt/homebrew/bin/supabase
+WARN  supawho         1.6.2 -> 1.7.0 available
+      -> supawho upgrade
 
-1 problem, 2 warnings.
+6 passed, 1 warning, 1 failed (score 81%)
 ```
 
-The summary line is `All checks passed.` when there is nothing to report.
-`FAIL` is uppercase so it stands out without color.
+Output deterministico, usato dai golden test.
 
-JSON (`--json`) — no progress line, no summary, just one object on stdout:
+### 2.3 JSON (`--json`)
+
+Solo JSON indentato su stdout, nessun colore/banner. Exit code identico agli altri renderer.
 
 ```json
 {
-  "ok": false,
-  "checks": [
-    {"group": "token", "name": "client-a", "status": "fail", "detail": "invalid or revoked — run 'supawho add client-a <new-token>'"}
-  ]
+  "accounts": [
+    {"name": "acme", "status": "pass", "detail": "mario@acme.it", "latency_ms": 142},
+    {"name": "old-client", "status": "fail", "detail": "token is invalid or revoked",
+     "hint": "supawho remove old-client"}
+  ],
+  "system": [
+    {"name": "supabase_cli", "status": "pass", "detail": "2.48.3 /opt/homebrew/bin/supabase"},
+    {"name": "active_account", "status": "pass", "detail": "acme (keychain)"},
+    {"name": "supawho_version", "status": "warn", "detail": "1.6.2 -> 1.7.0 available",
+     "hint": "supawho upgrade"}
+  ],
+  "summary": {"pass": 6, "warn": 1, "fail": 1, "score": 81}
 }
 ```
 
-`ok` is `true` iff no check has status `fail`. Exit code matches.
+`status` ∈ {`pass`, `warn`, `fail`}. `hint` e `latency_ms` sono omessi quando vuoti/assenti.
 
-## Testing (TDD)
+## 3. Architettura
 
-`internal/cli` (fakes on `App`, memory store):
+Le dipendenze esterne sono funzioni iniettabili su `App` (stesso pattern di `Profile` e `Lookup`), così i test usano fake senza HTTP né keyring.
 
-- one test per severity cell of the Checks table;
-- inconsistent index (name in index, key missing in memory backend);
-- duplicate and invalid names in the index;
-- keyring failure skips index/token checks;
-- network failure skips token and latest-version checks;
-- single-account filter, and unknown account;
-- `--json` output parses and `ok` matches; `--json` before/after account;
-- exit code 0 with warnings only, 1 with any fail;
-- nil dependency → `warn`, no panic.
+### `internal/supabase`
 
-`internal/supabase` (`httptest`): `Validate` on 200/401/403/500; `Ping` on any
-status and on a closed server; `getJSON` returns the sentinels.
+- **`profile.go`**: `var ErrUnauthorized = errors.New("token is invalid or revoked")`, restituito da `getJSON` sul 401. Messaggio invariato → `whoami`/`find` non cambiano.
+- **`active.go`** (nuovo): `ActiveToken() (token, source string, err error)`. Ordine:
+  1. env `SUPABASE_ACCESS_TOKEN` → source `env`;
+  2. keyring, service `Supabase CLI`, chiavi `supabase` poi `access-token` → source `keychain`;
+  3. file `~/.supabase/access-token` → source `file`.
 
-`internal/updater`: `FetchLatestFor` hits the right URL; `FetchLatest`
-unchanged.
+  Nessuna sorgente → `ErrNoActiveToken`. Le sorgenti sono variabili di package sostituibili nei test. **Da verificare in implementazione** sul sorgente della Supabase CLI: nome service/chiave del keyring (inclusa la variante per profilo) e prefisso eventuale (es. `go-keyring-base64:`).
+- **`cli.go`** (nuovo): `CLIInfo() (path, version string, err error)` → `exec.LookPath("supabase")` + `supabase --version` con timeout 5s.
 
-The memory backend may need a test hook to inject a read error for the
-keyring-failure case.
+### `internal/cli`
 
-## Docs
+- **`app.go`**: nuovi campi `ActiveToken func() (string, string, error)`, `CLIInfo func() (string, string, error)`, `Latest func(ctx context.Context) (string, error)`; `case "doctor", "check":` → `a.Doctor(args[1:])`.
+- **`doctor.go`** (nuovo): parsing argomenti (scansione semplice, niente `flag.FlagSet`), esecuzione check, classificazione errori (`errors.Is` su `supabase.ErrUnauthorized`, `store.ErrNotFound`, `supabase.ErrNoActiveToken`), modello dati:
+  ```go
+  type check struct {
+      Name, Status, Detail, Hint string
+      Latency time.Duration
+  }
+  type report struct {
+      Accounts, System []check
+      Pass, Warn, Fail, Score int
+  }
+  ```
+  Nessuna logica di rendering. Per l'output fancy espone i risultati tramite callback per-riga, così il renderer può aggiornare lo spinner all'arrivo di ciascun check.
+- **`doctor_render.go`** (nuovo): `renderFancy`, `renderPlain`, `renderJSON`. La scelta: `--json` → JSON; altrimenti fancy se `a.UI` ha TTY e colore, plain in tutti gli altri casi.
+- **`banner.go`**: riga help `doctor [name] [--json]   Check tokens and environment health`.
 
-- `README.md`: add `doctor` to the commands section.
-- `docs/src/content/docs/commands/doctor.md`: new page in the style of
-  `whoami.md`; link from `commands.md`.
+### `internal/cli/ui` (solo ANSI, nessuna nuova dipendenza)
+
+- **`ui.go`**: colore da `bool` a livello `none|ansi256|truecolor`; `paint` resta compatibile con i chiamanti esistenti.
+- **`style.go`** (nuovo): `Gradient(s, from, to RGB)`, `Badge(status)`, `Section(icon, title)`, `HintCmd(text, cmd)`, `Box(lines)`, `ProgressBar(pct, width)`, `visibleWidth(s)` (ignora ANSI, conta emoji/braille).
+- **`live.go`** (nuovo): `LiveList` con `Add(label) *Row`, `Row.Done(line)`, `Stop()`; righe a posizione fissa, ridisegno ogni 80ms con `\r`, `\033[nA`, `\033[2K`; mutex; cursore ripristinato su `Stop` e SIGINT. Senza TTY/colore: `Done` non stampa nulla subito, `Stop` stampa le righe finali in ordine.
+- **`banner.go`**: `BannerGradient()` sul logo esistente; `Banner()` invariato.
+
+### `main.go`
+
+Wiring di `supabase.ActiveToken`, `supabase.CLIInfo`, `Latest` (su `updater.FetchLatest` con client 5s); `doctor`/`check` esclusi da `MaybeNotify`.
+
+### Documentazione
+
+- `docs/src/content/docs/commands/doctor.md` (modello: `commands/find.md`): Synopsis, Example, Behavior (tabella check), JSON output, Exit codes, See also.
+- Riga in `docs/src/content/docs/commands.md`, voce sidebar in `docs/astro.config.mjs`, tabella usage e feature nel `README.md`.
+
+### Prerequisiti git
+
+1. Commit separato su `main` del refactor UI in sospeso (`internal/cli/ui/` e file collegati): `refactor(ui): …`.
+2. Eliminare il vecchio `feat/doctor` (nessun commit proprio, indietro rispetto a `main`) e ricrearlo da `main` aggiornato.
+
+## 4. Test e verifica
+
+### Test automatici
+
+**`internal/cli/cli_test.go`** (harness `newHarness`, fake via closure, output plain):
+
+- tutti i check PASS → exit 0, golden dell'output plain;
+- un token `ErrUnauthorized` → FAIL con hint, exit 1;
+- errore di rete → WARN, exit 0;
+- token mancante nel keyring per un nome in indice → FAIL;
+- `doctor <nome>` controlla un solo account; nome inesistente → exit 1;
+- argomento sconosciuto → exit 1;
+- CLI assente → FAIL, exit 1;
+- token attivo non salvato → WARN; `ErrNoActiveToken` → WARN;
+- token attivo uguale a un token invalido → FAIL;
+- update disponibile → WARN con hint; versione `dev` → WARN "skipped";
+- `--json`: unmarshal dell'output, verifica status, summary, assenza di token nel testo;
+- help aggiornato (`wantHelp`).
+
+**`internal/supabase`**:
+
+- `profile_test.go`: `errors.Is(err, ErrUnauthorized)` sul 401;
+- `active_test.go`: precedenza env > keychain (`supabase` > `access-token`) > file, con `keyring.MockInit()` e HOME temporanea; nessuna sorgente → `ErrNoActiveToken`.
+
+**`internal/cli/ui/ui_test.go`**: `visibleWidth`, interpolazione `Gradient` (inclusa la fallback 256), `Badge`/`Box` plain, `LiveList` non-TTY deterministica, calcolo bucket colore di `ProgressBar`.
+
+**Score**: test di unità sul calcolo (inclusi arrotondamento e totale 0).
+
+### Verifica manuale
+
+1. `go test ./...` e `go vet ./...`.
+2. `go build -o /tmp/supawho . && /tmp/supawho doctor` sugli account reali, in iTerm e Terminal: gradiente, spinner, box; nessun byte spurio sul prompt; cursore visibile anche dopo Ctrl-C a metà; riga account attivo corretta dopo `supawho use <x>`.
+3. Fallback: `COLORTERM= …` (256 colori), `NO_COLOR=1 …` e `… | cat` (plain).
+4. `/tmp/supawho doctor --json | jq .` e `echo $?`.
+5. `SUPABASE_ACCESS_TOKEN=bogus /tmp/supawho doctor` → account attivo WARN "not saved".
+6. `PATH=/usr/bin:/bin /tmp/supawho doctor` → CLI non trovata, exit 1.
+7. `cd docs && npm run build`.
