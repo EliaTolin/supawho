@@ -2,10 +2,14 @@ package supabase
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 )
+
+// ErrUnauthorized means the Management API rejected the token (HTTP 401).
+var ErrUnauthorized = errors.New("token is invalid or revoked")
 
 // apiBase is a var (not a const) so tests can point it at a local server.
 var apiBase = "https://api.supabase.com"
@@ -69,7 +73,7 @@ func getJSON(client *http.Client, token, path string, v any) error {
 	case http.StatusOK:
 		return json.NewDecoder(resp.Body).Decode(v)
 	case http.StatusUnauthorized:
-		return fmt.Errorf("token is invalid or revoked")
+		return ErrUnauthorized
 	default:
 		return fmt.Errorf("Supabase API returned status %d", resp.StatusCode)
 	}
