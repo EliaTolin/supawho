@@ -20,7 +20,10 @@ func CLIInfo() (path, version string, err error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	out, err := exec.CommandContext(ctx, path, "--version").Output()
+	cmd := exec.CommandContext(ctx, path, "--version")
+	// Don't hang if a wrapper script leaves a child holding stdout open.
+	cmd.WaitDelay = time.Second
+	out, err := cmd.Output()
 	version = strings.TrimSpace(string(out))
 	if err != nil || version == "" {
 		version = "unknown"

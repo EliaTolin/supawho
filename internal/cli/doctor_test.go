@@ -178,7 +178,6 @@ func TestDoctorArgs(t *testing.T) {
 		{[]string{"doctor", "ghost"}, "Account 'ghost' not found"},
 		{[]string{"doctor", "--foo"}, "Usage: supawho doctor [name] [--json]"},
 		{[]string{"doctor", "a", "b"}, "Usage: supawho doctor [name] [--json]"},
-		{[]string{"doctor", "ghost", "--json"}, "Account 'ghost' not found"},
 	}
 	for _, c := range cases {
 		h := newDoctorHarness("a", "sbp_ok_a")
@@ -191,7 +190,7 @@ func TestDoctorCLIMissing(t *testing.T) {
 	h := newDoctorHarness("a", "sbp_ok_a")
 	h.app.CLIInfo = func() (string, string, error) { return "", "", errors.New("not found") }
 	h.run(t, 1, "doctor")
-	h.mustContain(t, "FAIL  Supabase CLI    supabase CLI not found in PATH", "-> install it: https://supabase.com/docs/guides/local-development/cli/getting-started")
+	h.mustContain(t, "FAIL  Supabase CLI    supabase CLI not found in PATH", "-> install: https://supabase.com/docs/guides/cli")
 }
 
 func TestDoctorActiveStates(t *testing.T) {
@@ -247,6 +246,8 @@ func TestDoctorVersion(t *testing.T) {
 			[]string{"WARN  supawho         dev (dev build), update check skipped"}},
 		{"offline", "9.9.9", func(context.Context) (string, error) { return "", errors.New("offline") },
 			[]string{"WARN  supawho         could not check for updates"}},
+		{"dev offline", "dev", func(context.Context) (string, error) { return "", errors.New("offline") },
+			[]string{"WARN  supawho         dev (dev build), update check skipped"}},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -420,5 +421,55 @@ func TestDoctorFancyJSONStaysPlain(t *testing.T) {
 	h.run(t, 0, "doctor", "--json")
 	if strings.Contains(buf.String(), "\x1b") || !json.Valid([]byte(buf.String())) {
 		t.Fatalf("--json on a color terminal must be pure JSON: %q", buf.String())
+	}
+}
+
+func TestDoctorJSONErrors(t *testing.T) {
+	cases := []struct {
+		args []string
+		want string
+	}{
+		{[]string{"doctor", "ghost", "--json"}, "Account 'ghost' not found. Run 'supawho list' to see saved accounts."},
+		{[]string{"doctor", "--json", "--foo"}, "Usage: supawho doctor [name] [--json]"},
+	}
+	for _, c := range cases {
+		h := newDoctorHarness("a", "sbp_ok_a")
+		h.run(t, 1, c.args...)
+		var got struct{ Error string }
+		if err := json.Unmarshal(h.out.Bytes(), &got); err != nil || got.Error != c.want {
+			t.Fatalf("%v: want JSON error %q, got %q (%v)", c.args, c.want, h.out.String(), err)
+		}
+	}
+}
+
+func TestDoctorKeyringReadErrorWarns(t *testing.T) {
+	h := newDoctorHarness()
+	h.app.Store = store.NewMemoryWithBrokenSecrets(errors.New("keychain locked"), "a")
+	h.run(t, 0, "doctor")
+	h.mustContain(t, "WARN  a  could not read token: keychain locked")
+	if strings.Contains(h.out.String(), "supawho remove a") {
+		t.Fatalf("a read error must not suggest deleting the account:\n%s", h.out.String())
+	}
+}
+
+func TestDoctorDevBuildSkipsNetwork(t *testing.T) {
+	h := newDoctorHarness("a", "sbp_ok_a")
+	h.app.Version = "dev"
+	called := false
+	h.app.Latest = func(context.Context) (string, error) { called = true; return "10.0.0", nil }
+	h.run(t, 0, "doctor")
+	if called {
+		t.Fatal("a dev build must not query the latest release")
+	}
+}
+
+func TestRenderPlainUnicodeAlign(t *testing.T) {
+	var buf bytes.Buffer
+	renderPlain(&buf, report{Accounts: []check{
+		{Name: "café", Status: statusPass, Detail: "x"},
+		{Name: "abcd", Status: statusPass, Detail: "y"},
+	}})
+	if !strings.Contains(buf.String(), "PASS  café  x\n") {
+		t.Fatalf("non-ASCII names misaligned:\n%s", buf.String())
 	}
 }

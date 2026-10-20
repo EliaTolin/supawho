@@ -3,6 +3,8 @@ package store
 // memBackend is an in-memory backend used by tests.
 type memBackend struct {
 	m map[string]string
+	// errs makes get fail for specific keys, simulating a broken OS store.
+	errs map[string]error
 }
 
 // NewMemory returns a Store backed by an in-memory map. For tests only.
@@ -11,6 +13,9 @@ func NewMemory() *Store {
 }
 
 func (b *memBackend) get(key string) (string, error) {
+	if err, ok := b.errs[key]; ok {
+		return "", err
+	}
 	v, ok := b.m[key]
 	if !ok {
 		return "", ErrNotFound
@@ -46,5 +51,18 @@ func (b *failBackend) delete(string) error        { return b.err }
 func NewMemoryWithOrphans(orphans ...string) *Store {
 	s := NewMemory()
 	_ = s.saveList(orphans)
+	return s
+}
+
+// NewMemoryWithBrokenSecrets returns an in-memory Store whose index lists
+// names but reading any of their tokens fails with err, simulating a locked
+// or unreachable OS store. For tests only.
+func NewMemoryWithBrokenSecrets(err error, names ...string) *Store {
+	b := &memBackend{m: make(map[string]string), errs: make(map[string]error)}
+	for _, n := range names {
+		b.errs[n] = err
+	}
+	s := newStore(b)
+	_ = s.saveList(names)
 	return s
 }

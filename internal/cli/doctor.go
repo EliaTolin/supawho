@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -31,7 +32,7 @@ const (
 
 const (
 	doctorUsage    = "Usage: supawho doctor [name] [--json]"
-	installCLIHint = "install it: https://supabase.com/docs/guides/local-development/cli/getting-started"
+	installCLIHint = "install: https://supabase.com/docs/guides/cli"
 	maxConcurrent  = 4
 )
 
@@ -60,21 +61,19 @@ type progress struct {
 func (a *App) Doctor(args []string) error {
 	target, jsonOut, ok := parseDoctorArgs(args)
 	if !ok {
-		a.UI.Err(doctorUsage)
-		return errHandled
+		return a.doctorError(jsonOut, doctorUsage)
 	}
 	if a.Profile == nil {
-		return errors.New("doctor is not available in this build")
+		return a.doctorError(jsonOut, "doctor is not available in this build")
 	}
 
 	names, err := a.Store.List()
 	if err != nil {
-		return err
+		return a.doctorError(jsonOut, err.Error())
 	}
 	if target != "" {
 		if !slices.Contains(names, target) {
-			a.UI.Err("Account '%s' not found. Run 'supawho list' to see saved accounts.", target)
-			return errHandled
+			return a.doctorError(jsonOut, fmt.Sprintf("Account '%s' not found. Run 'supawho list' to see saved accounts.", target))
 		}
 		names = []string{target}
 	}
@@ -98,14 +97,32 @@ func (a *App) Doctor(args []string) error {
 	return nil
 }
 
+// doctorError reports a usage or setup error and fails. With --json it is a
+// JSON object, so stdout stays machine-readable even when doctor can't run.
+func (a *App) doctorError(jsonOut bool, msg string) error {
+	if !jsonOut {
+		a.UI.Err("%s", msg)
+		return errHandled
+	}
+	b, err := json.Marshal(struct {
+		Error string `json:"error"`
+	}{msg})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(a.Out, "%s\n", b)
+	return errHandled
+}
+
 // parseDoctorArgs accepts at most one account name and the --json flag.
+// jsonOut is reported even when ok is false, so errors can match the format.
 func parseDoctorArgs(args []string) (target string, jsonOut, ok bool) {
+	jsonOut = slices.Contains(args, "--json")
 	for _, arg := range args {
 		switch {
 		case arg == "--json":
-			jsonOut = true
 		case strings.HasPrefix(arg, "-"), target != "":
-			return "", false, false
+			return "", jsonOut, false
 		default:
 			target = arg
 		}
@@ -127,14 +144,29 @@ func (a *App) diagnose(names []string, p progress) report {
 
 	// Every saved token is read up front: the active-account check compares
 	// against all of them, and any error text is scrubbed of all of them.
+	// Each secret is read exactly once, since every read may prompt the user
+	// to unlock the OS store.
 	all, _ := a.Store.List()
 	var saved []savedToken
 	secrets := []string{}
+	readErrs := map[string]error{}
 	for _, n := range all {
-		if tok, err := a.Store.Get(n); err == nil {
-			saved = append(saved, savedToken{n, tok})
-			secrets = append(secrets, tok)
+		tok, err := a.Store.Get(n)
+		if err != nil {
+			readErrs[n] = err
+			continue
 		}
+		saved = append(saved, savedToken{n, tok})
+		secrets = append(secrets, tok)
+	}
+	tokenOf := func(name string) (string, error) {
+		if err, ok := readErrs[name]; ok {
+			return "", err
+		}
+		if i := slices.IndexFunc(saved, func(s savedToken) bool { return s.name == name }); i >= 0 {
+			return saved[i].token, nil
+		}
+		return "", store.ErrNotFound
 	}
 	active, source, activeErr := "", "", error(nil)
 	if a.ActiveToken != nil {
@@ -155,7 +187,8 @@ func (a *App) diagnose(names []string, p progress) report {
 			defer wg.Done()
 			sem <- struct{}{}
 			defer func() { <-sem }()
-			c := a.checkAccount(n, secrets, now)
+			token, err := tokenOf(n)
+			c := a.checkAccount(n, token, err, secrets, now)
 			mu.Lock()
 			defer mu.Unlock()
 			r.Accounts[i] = c
@@ -203,15 +236,17 @@ func reAddHint(name string) string {
 	return fmt.Sprintf("supawho remove %s && supawho add %s <new-token>", name, name)
 }
 
-func (a *App) checkAccount(name string, secrets []string, now func() time.Time) check {
+// checkAccount verifies one account; readErr is the error from reading its
+// token. Only a token that is really gone fails: a store that can't be read
+// right now (locked, D-Bus timeout) is a warning, never a reason to re-add.
+func (a *App) checkAccount(name, token string, readErr error, secrets []string, now func() time.Time) check {
 	c := check{Name: name}
-	token, err := a.Store.Get(name)
-	if err != nil {
-		c.Status, c.Hint = statusFail, reAddHint(name)
-		c.Detail = "token missing from the OS secret store"
-		if !errors.Is(err, store.ErrNotFound) {
-			c.Detail = redact("could not read token: "+err.Error(), secrets)
-		}
+	switch {
+	case errors.Is(readErr, store.ErrNotFound):
+		c.Status, c.Detail, c.Hint = statusFail, "token missing from the OS secret store", reAddHint(name)
+		return c
+	case readErr != nil:
+		c.Status, c.Detail = statusWarn, redact("could not read token: "+readErr.Error(), secrets)
 		return c
 	}
 
@@ -289,6 +324,12 @@ func (a *App) checkVersion() check {
 		c.Status, c.Detail = statusWarn, "not available in this build"
 		return c
 	}
+	// A non-semver current version (dev build) can't be compared, so skip the
+	// network call entirely.
+	if _, ok := updater.IsNewer(a.Version, "0.0.0"); !ok {
+		c.Status, c.Detail = statusWarn, a.Version+" (dev build), update check skipped"
+		return c
+	}
 	latest, err := a.Latest(context.Background())
 	if err != nil {
 		c.Status, c.Detail = statusWarn, "could not check for updates"
@@ -297,7 +338,7 @@ func (a *App) checkVersion() check {
 	newer, ok := updater.IsNewer(a.Version, latest)
 	switch {
 	case !ok:
-		c.Status, c.Detail = statusWarn, a.Version+" (dev build), update check skipped"
+		c.Status, c.Detail = statusWarn, "could not check for updates"
 	case newer:
 		c.Status, c.Detail, c.Hint = statusWarn, fmt.Sprintf("%s -> %s available", a.Version, latest), "supawho upgrade"
 	default:

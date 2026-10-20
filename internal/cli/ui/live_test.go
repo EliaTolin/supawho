@@ -102,3 +102,57 @@ func TestBannerGradientPlain(t *testing.T) {
 		t.Fatalf("plain BannerGradient = %q, want %q", a.String(), b.String())
 	}
 }
+
+func TestLiveListTruncatesWhileAnimating(t *testing.T) {
+	buf := &syncBuffer{}
+	u := NewWithLevel(buf, LevelTrue)
+	u.cols, u.rows = 10, 40
+	l := u.NewLiveList()
+	l.Add("a").Done(strings.Repeat("x", 30))
+	l.Add("b") // still spinning: redraws must not wrap
+	animated := buf.String()
+	if strings.Contains(animated, strings.Repeat("x", 10)) {
+		t.Fatalf("animated redraw wrote a line wider than the terminal: %q", animated)
+	}
+	l.Stop()
+	if !strings.Contains(buf.String(), strings.Repeat("x", 30)) {
+		t.Fatalf("final draw must keep the full line: %q", buf.String())
+	}
+}
+
+func TestStaticListPrintsOnStop(t *testing.T) {
+	buf := &syncBuffer{}
+	u := NewWithLevel(buf, LevelTrue)
+	l := u.NewStaticList()
+	l.Add("a").Done("A")
+	if buf.String() != "" {
+		t.Fatalf("static list wrote before Stop: %q", buf.String())
+	}
+	l.Stop()
+	if got := buf.String(); got != "A\n" {
+		t.Fatalf("static output = %q, want %q", got, "A\n")
+	}
+}
+
+func TestFitsLive(t *testing.T) {
+	u := NewWithLevel(&bytes.Buffer{}, LevelTrue)
+	if !u.FitsLive(500) {
+		t.Fatal("unknown terminal height must allow animation")
+	}
+	u.rows = 20
+	if !u.FitsLive(18) || u.FitsLive(19) {
+		t.Fatal("FitsLive must require lines < rows-1")
+	}
+}
+
+func TestLiveListDoneAfterStopIsSilent(t *testing.T) {
+	buf := &syncBuffer{}
+	l := NewWithLevel(buf, LevelTrue).NewLiveList()
+	r := l.Add("a")
+	l.Stop()
+	before := buf.String()
+	r.Done("late")
+	if buf.String() != before {
+		t.Fatalf("Done after Stop wrote output: %q", strings.TrimPrefix(buf.String(), before))
+	}
+}

@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/EliaTolin/supawho/internal/cli/ui"
 )
@@ -24,9 +25,15 @@ func (a *App) renderFancy(names []string) report {
 	}
 	width := 0
 	for _, n := range names {
-		width = max(width, len(n))
+		width = max(width, utf8.RuneCountInString(n))
 	}
+	// Each account takes up to two lines (result + hint). A block taller than
+	// the screen can't be redrawn in place, so it is printed once at the end.
 	accounts := u.NewLiveList()
+	if !u.FitsLive(2 * len(names)) {
+		accounts = u.NewStaticList()
+	}
+	defer accounts.Stop()
 	rows := make([]*ui.Row, len(names))
 	for i, n := range names {
 		rows[i] = accounts.Add("  " + u.Bold(n))
@@ -35,6 +42,7 @@ func (a *App) renderFancy(names []string) report {
 	labels := []string{checkCLI, checkActive, checkVersion}
 	var sysRows []*ui.Row
 	system := u.NewLiveList()
+	defer system.Stop()
 
 	r := a.diagnose(names, progress{
 		account: func(i int, c check) { rows[i].Done(fancyRow(u, c, width)) },

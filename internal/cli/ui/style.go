@@ -25,21 +25,43 @@ const (
 
 // detectLevel picks the color depth for w: none unless w is a terminal and
 // NO_COLOR is unset, truecolor when COLORTERM advertises it, else 256.
+// On Windows the console must also accept VT sequences, otherwise output
+// falls back to plain text.
 func detectLevel(w io.Writer) Level {
 	f, ok := w.(*os.File)
-	tty := ok && term.IsTerminal(int(f.Fd()))
-	return detectLevelFor(tty, os.Getenv("NO_COLOR"), os.Getenv("COLORTERM"))
+	tty := ok && term.IsTerminal(int(f.Fd())) && enableVT(f)
+	return detectLevelFor(tty, os.Getenv("NO_COLOR"), os.Getenv("COLORTERM"), os.Getenv("TERM"))
 }
 
-func detectLevelFor(tty bool, noColor, colorterm string) Level {
+func detectLevelFor(tty bool, noColor, colorterm, termEnv string) Level {
 	switch {
-	case !tty || noColor != "":
+	case !tty || noColor != "" || termEnv == "dumb":
 		return LevelNone
 	case colorterm == "truecolor" || colorterm == "24bit":
 		return LevelTrue
 	default:
 		return Level256
 	}
+}
+
+// terminalSize reads the size of a terminal writer via ioctl (never an escape
+// query); 0, 0 when w is not a terminal.
+func terminalSize(w io.Writer) (cols, rows int) {
+	f, ok := w.(*os.File)
+	if !ok || !term.IsTerminal(int(f.Fd())) {
+		return 0, 0
+	}
+	cols, rows, err := term.GetSize(int(f.Fd()))
+	if err != nil {
+		return 0, 0
+	}
+	return cols, rows
+}
+
+// FitsLive reports whether a block of lines can be animated in place: taller
+// blocks would scroll, and cursor-up cannot reach above the top of the screen.
+func (u *UI) FitsLive(lines int) bool {
+	return u.rows == 0 || lines < u.rows-1
 }
 
 // RGB is a 24-bit color, downsampled to the 256 palette when needed.
@@ -207,4 +229,42 @@ func VisibleWidth(s string) int {
 		}
 	}
 	return w
+}
+
+// truncate shortens s to at most max visible cells, ending in "…". Escape
+// sequences are kept, and a reset is appended if any color was open.
+func truncate(s string, max int) string {
+	if VisibleWidth(s) <= max {
+		return s
+	}
+	var sb strings.Builder
+	w, colored := 0, false
+	for i := 0; i < len(s); {
+		if s[i] == 0x1b && i+1 < len(s) && s[i+1] == '[' {
+			j := i + 2
+			for j < len(s) && (s[j] < 0x40 || s[j] > 0x7e) {
+				j++
+			}
+			if j < len(s) {
+				j++
+			}
+			sb.WriteString(s[i:j])
+			colored = true
+			i = j
+			continue
+		}
+		r, size := utf8.DecodeRuneInString(s[i:])
+		rw := VisibleWidth(string(r))
+		if w+rw > max-1 {
+			break
+		}
+		sb.WriteRune(r)
+		w += rw
+		i += size
+	}
+	sb.WriteString("…")
+	if colored {
+		sb.WriteString(reset)
+	}
+	return sb.String()
 }

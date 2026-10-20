@@ -14,17 +14,19 @@ func TestDetectLevel(t *testing.T) {
 		tty       bool
 		noColor   string
 		colorterm string
+		term      string
 		want      Level
 	}{
-		{true, "", "truecolor", LevelTrue},
-		{true, "", "24bit", LevelTrue},
-		{true, "", "", Level256},
-		{true, "1", "truecolor", LevelNone},
-		{false, "", "truecolor", LevelNone},
+		{true, "", "truecolor", "xterm-256color", LevelTrue},
+		{true, "", "24bit", "xterm-256color", LevelTrue},
+		{true, "", "", "xterm-256color", Level256},
+		{true, "1", "truecolor", "xterm-256color", LevelNone},
+		{false, "", "truecolor", "xterm-256color", LevelNone},
+		{true, "", "truecolor", "dumb", LevelNone},
 	}
 	for _, c := range cases {
-		if got := detectLevelFor(c.tty, c.noColor, c.colorterm); got != c.want {
-			t.Errorf("detectLevelFor(%v, %q, %q) = %v, want %v", c.tty, c.noColor, c.colorterm, got, c.want)
+		if got := detectLevelFor(c.tty, c.noColor, c.colorterm, c.term); got != c.want {
+			t.Errorf("detectLevelFor(%v, %q, %q, %q) = %v, want %v", c.tty, c.noColor, c.colorterm, c.term, got, c.want)
 		}
 	}
 }
@@ -100,6 +102,27 @@ func TestProgressColor(t *testing.T) {
 	for pct, want := range cases {
 		if got := progressColor(pct); got != want {
 			t.Errorf("progressColor(%d) = %q, want %q", pct, got, want)
+		}
+	}
+}
+
+func TestTruncate(t *testing.T) {
+	cases := []struct {
+		in   string
+		max  int
+		want string
+	}{
+		{"abc", 5, "abc"},
+		{"abcdef", 4, "abc…"},
+		{"\x1b[1mabcdef\x1b[0m", 4, "\x1b[1mabc…\x1b[0m"},
+		{"🩺abc", 3, "🩺…"},
+	}
+	for _, c := range cases {
+		if got := truncate(c.in, c.max); got != c.want {
+			t.Errorf("truncate(%q, %d) = %q, want %q", c.in, c.max, got, c.want)
+		}
+		if VisibleWidth(truncate(c.in, c.max)) > c.max {
+			t.Errorf("truncate(%q, %d) is wider than %d", c.in, c.max, c.max)
 		}
 	}
 }

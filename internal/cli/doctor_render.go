@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"unicode/utf8"
 )
 
 // systemLabels are the human labels for the system checks.
@@ -40,7 +41,7 @@ func renderPlain(w io.Writer, r report) {
 	}
 	width := 0
 	for _, c := range r.Accounts {
-		width = max(width, len(c.Name))
+		width = max(width, utf8.RuneCountInString(c.Name))
 	}
 	for _, c := range r.Accounts {
 		plainRow(w, c, width)

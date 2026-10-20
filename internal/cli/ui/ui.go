@@ -27,11 +27,16 @@ const (
 type UI struct {
 	w     io.Writer
 	level Level
+	// cols and rows are the terminal size, 0 when unknown (not a terminal).
+	cols, rows int
 }
 
-// New builds a UI whose color level is detected from w and the environment.
+// New builds a UI whose color level and size are detected from w and the
+// environment.
 func New(w io.Writer) *UI {
-	return &UI{w: w, level: detectLevel(w)}
+	u := &UI{w: w, level: detectLevel(w)}
+	u.cols, u.rows = terminalSize(w)
+	return u
 }
 
 // NewWithLevel builds a UI with an explicit color level (tests, renderers).

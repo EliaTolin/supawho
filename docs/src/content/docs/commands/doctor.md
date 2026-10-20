@@ -44,7 +44,7 @@ WARN  supawho         1.6.2 -> 1.7.0 available
 
 | Check | PASS | WARN | FAIL |
 |---|---|---|---|
-| Each account's token (`GET /v1/profile`) | Valid, shows the email and latency | Network error, timeout or 5xx: could not verify | Token rejected (401), or missing from the OS secret store |
+| Each account's token (`GET /v1/profile`) | Valid, shows the email and latency | Network error, timeout or 5xx (could not verify), or the OS secret store could not be read | Token rejected (401), or missing from the OS secret store |
 | Supabase CLI | Found in `PATH`, shows version and path | — | Not installed |
 | Active account | The token the Supabase CLI is using matches a saved account | Not logged in, or logged in with a token that isn't saved in supawho | The active token belongs to an account whose token failed |
 | supawho version | Up to date | Update available, check failed, or development build | — |
@@ -79,6 +79,12 @@ supawho doctor --json
 ```
 
 `status` is one of `pass`, `warn` or `fail`. `hint` and `latency_ms` are omitted when empty.
+
+If doctor can't run at all (unknown account, invalid arguments), `--json` still prints JSON, an object with a single `error` field, and exits with `1`:
+
+```json
+{"error":"Account 'ghost' not found. Run 'supawho list' to see saved accounts."}
+```
 
 ## Exit codes
 
