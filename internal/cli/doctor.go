@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/EliaTolin/supawho/internal/cli/ui"
 	"github.com/EliaTolin/supawho/internal/store"
 	"github.com/EliaTolin/supawho/internal/supabase"
 	"github.com/EliaTolin/supawho/internal/updater"
@@ -46,11 +47,12 @@ type report struct {
 	Pass, Warn, Fail, Score int
 }
 
-// progress lets a renderer react as each check completes. Either field may be
-// nil; calls are serialized.
+// progress lets a renderer react as checks run. Any field may be nil; calls
+// are serialized. beforeSystem runs once, after every account check is done.
 type progress struct {
-	account func(i int, c check)
-	system  func(i int, c check)
+	account      func(i int, c check)
+	beforeSystem func()
+	system       func(i int, c check)
 }
 
 // Doctor checks every saved token (or just one) against the Supabase API plus
@@ -84,6 +86,8 @@ func (a *App) Doctor(args []string) error {
 		if err := renderJSON(a.Out, r); err != nil {
 			return err
 		}
+	case a.UI.Level() != ui.LevelNone:
+		r = a.renderFancy(names)
 	default:
 		r = a.diagnose(names, progress{})
 		renderPlain(a.Out, r)
@@ -161,6 +165,9 @@ func (a *App) diagnose(names []string, p progress) report {
 		}()
 	}
 	wg.Wait()
+	if p.beforeSystem != nil {
+		p.beforeSystem()
+	}
 
 	steps := []func() check{
 		a.checkCLI,

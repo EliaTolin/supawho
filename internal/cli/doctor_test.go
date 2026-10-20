@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/EliaTolin/supawho/internal/cli/ui"
 	"github.com/EliaTolin/supawho/internal/store"
 	"github.com/EliaTolin/supawho/internal/supabase"
 )
@@ -354,5 +356,69 @@ func TestDoctorPreservesOrder(t *testing.T) {
 			t.Fatalf("rows out of order:\n%s", out)
 		}
 		last = at
+	}
+}
+
+// lockedBuffer is safe for the spinner goroutine of the fancy renderer.
+type lockedBuffer struct {
+	mu sync.Mutex
+	b  bytes.Buffer
+}
+
+func (l *lockedBuffer) Write(p []byte) (int, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.b.Write(p)
+}
+
+func (l *lockedBuffer) String() string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.b.String()
+}
+
+func fancyRun(t *testing.T, h *harness, wantCode int) string {
+	t.Helper()
+	buf := &lockedBuffer{}
+	h.app.Out = buf
+	h.app.UI = ui.NewWithLevel(buf, ui.LevelTrue)
+	if code := h.app.Run([]string{"doctor"}); code != wantCode {
+		t.Fatalf("exit = %d, want %d\n%s", code, wantCode, buf.String())
+	}
+	return buf.String()
+}
+
+func TestDoctorFancySmoke(t *testing.T) {
+	h := newDoctorHarness("a", "sbp_ok_a", "b", "sbp_bad")
+	out := fancyRun(t, h, 1)
+	for _, want := range []string{"Accounts", "System", "FAIL", "supawho remove b", "Health", "\x1b[?25l", "\x1b[?25h"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("fancy output missing %q:\n%q", want, out)
+		}
+	}
+	if strings.Contains(out, "sbp_") {
+		t.Fatalf("fancy output leaks a token: %q", out)
+	}
+	if strings.Count(out, "\x1b[?25l") != strings.Count(out, "\x1b[?25h") {
+		t.Fatalf("cursor hidden/shown counts differ: %q", out)
+	}
+}
+
+func TestDoctorFancyHealthy(t *testing.T) {
+	h := newDoctorHarness("a", "sbp_ok_a")
+	out := fancyRun(t, h, 0)
+	if !strings.Contains(out, "All systems healthy") {
+		t.Fatalf("fancy output missing healthy message: %q", out)
+	}
+}
+
+func TestDoctorFancyJSONStaysPlain(t *testing.T) {
+	h := newDoctorHarness("a", "sbp_ok_a")
+	buf := &lockedBuffer{}
+	h.app.Out = buf
+	h.app.UI = ui.NewWithLevel(buf, ui.LevelTrue)
+	h.run(t, 0, "doctor", "--json")
+	if strings.Contains(buf.String(), "\x1b") || !json.Valid([]byte(buf.String())) {
+		t.Fatalf("--json on a color terminal must be pure JSON: %q", buf.String())
 	}
 }
