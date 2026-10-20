@@ -7,3 +7,7 @@
 # Go
 *.test
 *.out
+supawho-preview
+
+# generated client-facing release notes
+/release-notes/

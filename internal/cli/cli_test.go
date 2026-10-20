@@ -111,7 +111,7 @@ func TestListPopulated(t *testing.T) {
 	_ = h.st.Add("b", "2")
 	h.app.Run([]string{"list"})
 	got := h.out.String()
-	if !strings.Contains(got, "  - a") || !strings.Contains(got, "  - b") {
+	if !strings.Contains(got, "● a") || !strings.Contains(got, "● b") {
 		t.Fatalf("output = %q", got)
 	}
 }
@@ -157,6 +157,48 @@ func TestRenameOntoExisting(t *testing.T) {
 		t.Fatalf("exit = %d, want 1", code)
 	}
 	if !strings.Contains(h.out.String(), "Account 'a' already exists.") {
+		t.Fatalf("output = %q", h.out.String())
+	}
+}
+
+func TestRenameInteractive(t *testing.T) {
+	// no args → pick account #1, type new name, confirm (default yes)
+	h := newHarness("1\nnewname\n\n")
+	_ = h.st.Add("old", "secret")
+	if code := h.app.Run([]string{"rename"}); code != 0 {
+		t.Fatalf("exit = %d\noutput:\n%s", code, h.out.String())
+	}
+	tok, err := h.st.Get("newname")
+	if err != nil || tok != "secret" {
+		t.Fatalf("Get(newname) = %q, %v", tok, err)
+	}
+	if _, err := h.st.Get("old"); err == nil {
+		t.Fatal("old account should no longer exist after rename")
+	}
+}
+
+func TestRenameInteractiveDeclineConfirm(t *testing.T) {
+	// declining the confirmation leaves the account untouched and exits 0
+	h := newHarness("1\nnewname\nn\n")
+	_ = h.st.Add("old", "secret")
+	if code := h.app.Run([]string{"rename"}); code != 0 {
+		t.Fatalf("exit = %d, want 0", code)
+	}
+	if tok, err := h.st.Get("old"); err != nil || tok != "secret" {
+		t.Fatalf("old should be unchanged, Get(old) = %q, %v", tok, err)
+	}
+	if _, err := h.st.Get("newname"); err == nil {
+		t.Fatal("newname should not exist after declining")
+	}
+}
+
+func TestRenameInteractiveInvalidSelection(t *testing.T) {
+	h := newHarness("9\n")
+	_ = h.st.Add("old", "secret")
+	if code := h.app.Run([]string{"rename"}); code != 1 {
+		t.Fatalf("exit = %d, want 1", code)
+	}
+	if !strings.Contains(h.out.String(), "Invalid selection.") {
 		t.Fatalf("output = %q", h.out.String())
 	}
 }
@@ -400,10 +442,10 @@ func TestVersionGolden(t *testing.T) {
 }
 
 const wantHelp = "\n" +
-	"\x1b[1;32m   ___  _   _ ___  ___  _    _ _  _  ___\x1b[0m\n" +
-	"\x1b[1;32m  / __|| | | | _ \\/ _ \\| |  | | || |/ _ \\\x1b[0m\n" +
-	"\x1b[1;32m  \\__ \\| |_| |  _/ (_) | |/\\| | __ | (_)\x1b[0m\n" +
-	"\x1b[1;32m  |___/ \\___/|_|  \\__\\_\\__/\\__|_||_|\\___/\x1b[0m\n" +
+	"   ___  _   _ ___  ___  _    _ _  _  ___\n" +
+	"  / __|| | | | _ \\/ _ \\| |  | | || |/ _ \\\n" +
+	"  \\__ \\| |_| |  _/ (_) | |/\\| | __ | (_)\n" +
+	"  |___/ \\___/|_|  \\__\\_\\__/\\__|_||_|\\___/\n" +
 	"\n     🔍 Who are you today?\n\n" +
 	"Usage:\n" +
 	"  supawho                        Interactive account selection\n" +
