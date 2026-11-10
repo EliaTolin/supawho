@@ -6,7 +6,7 @@ import starlight from '@astrojs/starlight';
 // (see Dockerfile) and feeds canonical URLs, the sitemap and the JSON-LD.
 // `||`, not `??`: the Dockerfile's ARG leaves SITE_URL as an empty string when
 // no build argument is passed, and an empty `site` fails the config check.
-const site = process.env.SITE_URL || 'https://v4kykt8per6jxu3vc5zkm0q9.auroradigital.it';
+const site = process.env.SITE_URL || 'https://supawho.auroradigital.it';
 
 export default defineConfig({
 	site,
@@ -16,6 +16,19 @@ export default defineConfig({
 			description:
 				'Switch between multiple Supabase accounts in seconds — on any OS. Tokens stay in your OS secret vault, never on disk.',
 			logo: { src: './src/assets/logo.png', alt: 'supawho' },
+			// Self-hosted Umami (cookieless). data-domains keeps local/preview builds
+			// from being counted.
+			head: [
+				{
+					tag: 'script',
+					attrs: {
+						defer: true,
+						src: 'https://stats.auroradigital.it/s.js',
+						'data-website-id': 'cd8bd58b-1ad9-499d-a02f-8bb3ecbdcf83',
+						'data-domains': 'supawho.auroradigital.it',
+					},
+				},
+			],
 			components: {
 				ThemeSelect: './src/components/ThemeSelect.astro',
 				ThemeProvider: './src/components/ThemeProvider.astro',
