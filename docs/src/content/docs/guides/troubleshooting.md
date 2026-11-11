@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting supawho
 description: Fixes for supawho error messages. Account not found, locked macOS Keychain, locked Linux keyring, Supabase CLI not found, revoked tokens and upgrade messages.
-lastUpdated: 2026-11-17
+lastUpdated: 2026-11-18
 ---
 
 Find the message you see below. Each heading is the text supawho or your system prints.
@@ -51,6 +51,10 @@ Pick a name without spaces or commas, for example `client-a` instead of `client 
 ## `supawho was installed via Homebrew (run: brew upgrade supawho).`
 
 Not an error. supawho was installed through a package manager, so [`supawho upgrade`](/commands/upgrade/) leaves the update to it. Run the command it suggests. The same applies to `.deb`, `.rpm` and `.apk` installs.
+
+## `open /usr/local/bin/.supawho.new: permission denied (run: sudo /usr/local/bin/supawho upgrade)`
+
+supawho is in a directory you can't write to, usually `/usr/local/bin` from the install script, so [`supawho upgrade`](/commands/upgrade/) can't replace it. Run the command it suggests.
 
 ## `Unknown command: <name>`
 
