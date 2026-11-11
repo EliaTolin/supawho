@@ -155,6 +155,7 @@ func ManagedBy(execPath string) string {
 	p := filepath.ToSlash(execPath)
 	switch {
 	case strings.Contains(p, "/Cellar/"),
+		strings.Contains(p, "/Caskroom/"),
 		strings.Contains(p, "/opt/homebrew/"),
 		strings.Contains(p, "/linuxbrew/"),
 		strings.Contains(p, "/.linuxbrew/"):
