@@ -99,12 +99,27 @@ func (a *App) Run(args []string) int {
 	}
 
 	if err != nil {
-		if !errors.Is(err, errHandled) {
+		switch {
+		case errors.Is(err, errHandled):
+		case errors.Is(err, store.ErrLocked):
+			a.keychainLocked()
+		default:
 			fmt.Fprintf(a.Out, "supawho: %v\n", err)
 		}
 		return 1
 	}
 	return 0
+}
+
+// keychainLocked explains a locked macOS Keychain, which otherwise surfaces
+// as a bare "exit status 36" from /usr/bin/security.
+func (a *App) keychainLocked() {
+	fmt.Fprintln(a.Out, "supawho: the macOS Keychain is locked, so your accounts can't be read or saved.")
+	fmt.Fprintln(a.Out)
+	fmt.Fprintln(a.Out, "Unlock it, then run the command again:")
+	fmt.Fprintln(a.Out, "  security unlock-keychain ~/Library/Keychains/login.keychain-db")
+	fmt.Fprintln(a.Out)
+	fmt.Fprintln(a.Out, "This usually happens over SSH or in a session without a graphical login.")
 }
 
 // runUpgrade self-updates the binary, or explains how to upgrade when the
