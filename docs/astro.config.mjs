@@ -6,7 +6,7 @@ import starlight from '@astrojs/starlight';
 // (see Dockerfile) and feeds canonical URLs, the sitemap and the JSON-LD.
 // `||`, not `??`: the Dockerfile's ARG leaves SITE_URL as an empty string when
 // no build argument is passed, and an empty `site` fails the config check.
-const site = process.env.SITE_URL || 'https://supawho.auroradigital.it';
+const site = process.env.SITE_URL || 'https://supawho.dev';
 
 export default defineConfig({
 	site,
@@ -25,7 +25,7 @@ export default defineConfig({
 						defer: true,
 						src: 'https://stats.auroradigital.it/s.js',
 						'data-website-id': 'cd8bd58b-1ad9-499d-a02f-8bb3ecbdcf83',
-						'data-domains': 'supawho.auroradigital.it',
+						'data-domains': 'supawho.dev',
 					},
 				},
 			],
