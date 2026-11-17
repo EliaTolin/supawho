@@ -42,6 +42,7 @@ func TestManagedBy(t *testing.T) {
 	cases := map[string]bool{
 		"/opt/homebrew/Cellar/supawho/1.4.0/bin/supawho":   true,
 		"/home/linuxbrew/.linuxbrew/bin/supawho":           true,
+		"/usr/local/Caskroom/supawho/1.6.2/supawho":        true,
 		"/Users/me/scoop/apps/supawho/current/supawho.exe": true,
 		"/usr/bin/supawho":             true,
 		"/usr/local/bin/supawho":       false, // manual install
