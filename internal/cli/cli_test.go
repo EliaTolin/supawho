@@ -426,3 +426,23 @@ func TestHelpGolden(t *testing.T) {
 		t.Fatalf("help output mismatch.\n got: %q\nwant: %q", got, wantHelp)
 	}
 }
+
+func TestAddKeychainLocked(t *testing.T) {
+	h := newHarness("")
+	h.app.Store = store.NewFailing(store.ErrLocked)
+	if code := h.app.Run([]string{"add", "work", "sbp_x"}); code != 1 {
+		t.Fatalf("exit code = %d, want 1", code)
+	}
+	out := h.out.String()
+	for _, want := range []string{
+		"macOS Keychain is locked",
+		"security unlock-keychain ~/Library/Keychains/login.keychain-db",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("output missing %q:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "exit status") {
+		t.Errorf("output leaks raw exit status:\n%s", out)
+	}
+}

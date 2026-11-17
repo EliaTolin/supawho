@@ -24,6 +24,10 @@ var ErrNotFound = errors.New("not found")
 // ErrExists is returned by Rename when the new name is already saved.
 var ErrExists = errors.New("already exists")
 
+// ErrLocked is returned when the OS secret store exists but is locked and
+// cannot prompt the user to unlock it.
+var ErrLocked = errors.New("secret store is locked")
+
 // backend is the low-level secret key/value store (service is fixed per backend).
 type backend interface {
 	get(key string) (string, error) // returns ErrNotFound if the key is missing

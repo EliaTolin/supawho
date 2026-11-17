@@ -27,3 +27,15 @@ func (b *memBackend) delete(key string) error {
 	delete(b.m, key)
 	return nil
 }
+
+// failBackend fails every operation with a fixed error.
+type failBackend struct{ err error }
+
+// NewFailing returns a Store whose every operation fails with err. For tests only.
+func NewFailing(err error) *Store {
+	return newStore(&failBackend{err: err})
+}
+
+func (b *failBackend) get(string) (string, error) { return "", b.err }
+func (b *failBackend) set(string, string) error   { return b.err }
+func (b *failBackend) delete(string) error        { return b.err }
