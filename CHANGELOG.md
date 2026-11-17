@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.0](https://github.com/EliaTolin/supawho/compare/v1.6.2...v1.7.0) (2026-11-17)
+
+
+### Features
+
+* **analytics:** add self-hosted Umami ([6c24ed9](https://github.com/EliaTolin/supawho/commit/6c24ed974c9142739892a0fa302c3a1f13fee981))
+
+
+### Bug Fixes
+
+* **store:** explain a locked macOS Keychain instead of "exit status 36" ([#27](https://github.com/EliaTolin/supawho/issues/27)) ([41bf100](https://github.com/EliaTolin/supawho/commit/41bf100fe24a403036f2ff5b336df0a65f24f39c))
+* **updater:** detect Homebrew cask installs under any prefix ([#25](https://github.com/EliaTolin/supawho/issues/25)) ([8757fea](https://github.com/EliaTolin/supawho/commit/8757feab2cc9f6fb4f17e22eb69db68f3ae4d71f))
+
 ## [1.6.2](https://github.com/EliaTolin/supawho/compare/v1.6.1...v1.6.2) (2026-10-08)
 
 
