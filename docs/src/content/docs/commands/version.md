@@ -13,7 +13,7 @@ supawho version
 ```
 
 ```
-supawho 1.7.0
+supawho 1.9.0
 ```
 
 `supawho --version` and `supawho -v` do the same thing.

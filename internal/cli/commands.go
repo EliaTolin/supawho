@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/EliaTolin/supawho/internal/store"
 )
@@ -12,39 +11,39 @@ import (
 // Add saves an account. With no name/token it falls back to the guided flow.
 func (a *App) Add(name, token string) error {
 	if name == "" || token == "" {
-		banner(a.Out)
+		a.UI.Banner()
 		return a.guidedAdd()
 	}
 	if err := validateName(name); err != nil {
-		fmt.Fprintln(a.Out, capitalize(err.Error())+".")
+		a.UI.Err("%s.", err.Error())
 		return errHandled
 	}
 	if err := a.Store.Add(name, token); err != nil {
 		return err
 	}
-	fmt.Fprintf(a.Out, "Account '%s' saved.\n", name)
+	a.UI.OK("Account '%s' saved.", name)
 	return nil
 }
 
 func (a *App) guidedAdd() error {
-	fmt.Fprintln(a.Out, "  No accounts found. Let's add your first one!")
-	fmt.Fprintln(a.Out, "")
-	fmt.Fprintln(a.Out, "  Get your token here:")
-	fmt.Fprintln(a.Out, "  → https://supabase.com/dashboard/account/tokens")
-	fmt.Fprintln(a.Out, "")
+	a.UI.Info("No accounts found. Let's add your first one!")
+	a.UI.Line()
+	a.UI.Hint("Get your token here:")
+	a.UI.Hint("→ https://supabase.com/dashboard/account/tokens")
+	a.UI.Line()
 
-	name := a.prompt("  Account name (e.g. myproject): ")
+	name, _ := a.Prompt.Input("Account name (e.g. myproject)")
 	if name == "" {
-		fmt.Fprintln(a.Out, "  Aborted.")
+		a.UI.Info("Aborted.")
 		return errHandled
 	}
 
-	token, err := a.readSecret("  Access token (sbp_...): ")
+	token, err := a.Prompt.Password("Access token (sbp_...)")
 	if err != nil {
 		return err
 	}
 	if token == "" {
-		fmt.Fprintln(a.Out, "  Aborted.")
+		a.UI.Info("Aborted.")
 		return errHandled
 	}
 
@@ -52,8 +51,7 @@ func (a *App) guidedAdd() error {
 		return err
 	}
 
-	confirm := a.prompt("\n  Login now as '" + name + "'? [Y/n] ")
-	if confirm == "" || isYes(confirm) {
+	if a.confirm("Login now as '" + name + "'?") {
 		return a.Use(name)
 	}
 	return nil
@@ -67,66 +65,61 @@ func (a *App) Rename(oldName, newName string) error {
 			return err
 		}
 		if len(names) == 0 {
-			fmt.Fprintln(a.Out, "No accounts saved.")
+			a.UI.Info("No accounts saved.")
 			return errHandled
 		}
-		banner(a.Out)
-		fmt.Fprintln(a.Out, "Select account to rename:")
-		fmt.Fprintln(a.Out, "")
-		printMenu(a.Out, names)
-		choice := a.prompt(fmt.Sprintf("\nEnter number (1-%d): ", len(names)))
-		idx, ok := parseSelection(choice, len(names))
-		if !ok {
-			fmt.Fprintln(a.Out, "Invalid selection.")
+		a.UI.Banner()
+		chosen, err := a.Prompt.Select("Select account to rename", names)
+		if err != nil {
+			a.UI.Err("Invalid selection.")
 			return errHandled
 		}
-		oldName = names[idx]
+		oldName = chosen
 	}
 
 	if newName == "" {
-		newName = a.prompt("  New name for '" + oldName + "': ")
+		newName, _ = a.Prompt.Input("New name for '" + oldName + "'")
 		if newName == "" {
-			fmt.Fprintln(a.Out, "  Aborted.")
+			a.UI.Info("Aborted.")
 			return errHandled
 		}
-		confirm := a.prompt("  Rename '" + oldName + "' → '" + newName + "'? [Y/n] ")
-		if confirm != "" && !isYes(confirm) {
-			fmt.Fprintln(a.Out, "  Aborted.")
+		if !a.confirm("Rename '" + oldName + "' → '" + newName + "'?") {
+			a.UI.Info("Aborted.")
 			return nil
 		}
 	}
 
 	if err := validateName(newName); err != nil {
-		fmt.Fprintln(a.Out, capitalize(err.Error())+".")
+		a.UI.Err("%s.", err.Error())
 		return errHandled
 	}
 
 	err := a.Store.Rename(oldName, newName)
 	if errors.Is(err, store.ErrNotFound) {
-		fmt.Fprintf(a.Out, "Account '%s' not found.\n", oldName)
+		a.UI.Err("Account '%s' not found.", oldName)
 		return errHandled
 	}
 	if errors.Is(err, store.ErrExists) {
-		fmt.Fprintf(a.Out, "Account '%s' already exists.\n", newName)
+		a.UI.Err("Account '%s' already exists.", newName)
 		return errHandled
 	}
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(a.Out, "Account '%s' renamed to '%s'.\n", oldName, newName)
+	a.UI.OK("Account '%s' renamed to '%s'.", oldName, newName)
 	return nil
 }
 
 // Remove deletes a saved account.
 func (a *App) Remove(name string) error {
 	if name == "" {
-		fmt.Fprintln(a.Out, "Usage: supawho remove <name>")
+		a.UI.Err("Usage: supawho remove <name>")
 		return errHandled
 	}
 	if err := a.Store.Remove(name); err != nil {
 		return err
 	}
-	fmt.Fprintf(a.Out, "Account '%s' removed.\n", name)
+	a.UI.OK("Account '%s' removed.", name)
 	return nil
 }
 
@@ -137,13 +130,14 @@ func (a *App) List() error {
 		return err
 	}
 	if len(names) == 0 {
-		fmt.Fprintln(a.Out, "No accounts saved. Add one with:")
-		fmt.Fprintln(a.Out, "  supawho add <name> <token>")
+		a.UI.Info("No accounts saved. Add one with:")
+		a.UI.Hint("supawho add <name> <token>")
 		return nil
 	}
-	fmt.Fprintln(a.Out, "Saved accounts:")
+	a.UI.Title("Saved accounts", len(names))
+	a.UI.Line()
 	for _, n := range names {
-		fmt.Fprintf(a.Out, "  - %s\n", n)
+		a.UI.Bullet("%s", n)
 	}
 	return nil
 }
@@ -158,7 +152,7 @@ func (a *App) Whoami(name string) error {
 	var names []string
 	if name != "" {
 		if _, err := a.Store.Get(name); errors.Is(err, store.ErrNotFound) {
-			fmt.Fprintf(a.Out, "Account '%s' not found. Run 'supawho list' to see saved accounts.\n", name)
+			a.UI.Err("Account '%s' not found. Run 'supawho list' to see saved accounts.", name)
 			return errHandled
 		} else if err != nil {
 			return err
@@ -170,40 +164,41 @@ func (a *App) Whoami(name string) error {
 			return err
 		}
 		if len(all) == 0 {
-			fmt.Fprintln(a.Out, "No accounts saved. Add one with:")
-			fmt.Fprintln(a.Out, "  supawho add <name> <token>")
+			a.UI.Info("No accounts saved. Add one with:")
+			a.UI.Hint("supawho add <name> <token>")
 			return nil
 		}
 		names = all
 	}
 
-	fmt.Fprintln(a.Out, "Looking up accounts on Supabase...")
-	tw := tabwriter.NewWriter(a.Out, 0, 2, 2, ' ', 0)
-	fmt.Fprintln(tw, "ACCOUNT\tEMAIL\tORGANIZATION")
+	a.UI.Hint("Looking up accounts on Supabase…")
+	a.UI.Line()
+	rows := make([][]string, 0, len(names))
 	for _, n := range names {
 		token, err := a.Store.Get(n)
 		if err != nil {
-			fmt.Fprintf(tw, "%s\t(not found)\t\n", n)
+			rows = append(rows, []string{n, "(not found)", ""})
 			continue
 		}
 		email, orgs, err := a.Profile(token)
 		if err != nil {
-			fmt.Fprintf(tw, "%s\t(%v)\t\n", n, err)
+			rows = append(rows, []string{n, fmt.Sprintf("(%v)", err), ""})
 			continue
 		}
 		if email == "" {
 			email = "(unavailable)"
 		}
-		fmt.Fprintf(tw, "%s\t%s\t%s\n", n, email, strings.Join(orgs, ", "))
+		rows = append(rows, []string{n, email, strings.Join(orgs, ", ")})
 	}
-	return tw.Flush()
+	a.UI.Table([]string{"ACCOUNT", "EMAIL", "ORGANIZATION"}, rows)
+	return nil
 }
 
-// Find is the reverse lookup: given a Supabase project ref (or a name
-// substring), it reports which saved account owns a matching project.
+// Find is the reverse lookup: given a Supabase project ref, it reports which
+// saved account owns a matching project.
 func (a *App) Find(query string) error {
 	if query == "" {
-		fmt.Fprintln(a.Out, "Usage: supawho find <project-ref>")
+		a.UI.Err("Usage: supawho find <project-ref>")
 		return errHandled
 	}
 	if a.Lookup == nil {
@@ -215,11 +210,11 @@ func (a *App) Find(query string) error {
 		return err
 	}
 	if len(names) == 0 {
-		fmt.Fprintln(a.Out, "No accounts saved.")
+		a.UI.Err("No accounts saved.")
 		return errHandled
 	}
 
-	fmt.Fprintf(a.Out, "Searching %d account(s) for %q...\n", len(names), query)
+	a.UI.Info("Searching %d account(s) for %q...", len(names), query)
 	found := false
 	for _, n := range names {
 		token, err := a.Store.Get(n)
@@ -228,7 +223,7 @@ func (a *App) Find(query string) error {
 		}
 		projects, err := a.Lookup(token)
 		if err != nil {
-			fmt.Fprintf(a.Out, "  %s: skipped (%v)\n", n, err)
+			a.UI.Warn("%s: skipped (%v)", n, err)
 			continue
 		}
 		for _, p := range projects {
@@ -240,7 +235,7 @@ func (a *App) Find(query string) error {
 	}
 
 	if !found {
-		fmt.Fprintf(a.Out, "No project matching %q in any saved account.\n", query)
+		a.UI.Err("No project matching %q in any saved account.", query)
 		return errHandled
 	}
 	return nil
@@ -256,41 +251,39 @@ func (a *App) printMatch(account, token string, p Project) {
 		}
 	}
 
-	field := func(label, value string) {
-		if value != "" {
-			fmt.Fprintf(a.Out, "  %-14s%s\n", label, value)
-		}
-	}
-
-	fmt.Fprintf(a.Out, "\n  ✓ Found in account '%s'\n\n", account)
-	field("Project", p.Name)
-	field("Reference", p.Ref)
-	field("Organization", p.Org)
-	field("Region", p.Region)
-	field("Status", p.Status)
-	field("Email", email)
-	field("Account", account)
-	fmt.Fprintf(a.Out, "\n  Switch to it:  supawho use %s\n\n", account)
+	a.UI.Line()
+	a.UI.OK("Found in account '%s'", account)
+	a.UI.Line()
+	a.UI.Field("Project", p.Name)
+	a.UI.Field("Reference", p.Ref)
+	a.UI.Field("Organization", p.Org)
+	a.UI.Field("Region", p.Region)
+	a.UI.Field("Status", p.Status)
+	a.UI.Field("Email", email)
+	a.UI.Field("Account", account)
+	a.UI.Line()
+	a.UI.Hint("Switch to it:  supawho use %s", account)
+	a.UI.Line()
 }
 
 // Use logs in with the token of the named account.
 func (a *App) Use(name string) error {
 	if name == "" {
-		fmt.Fprintln(a.Out, "Usage: supawho use <name>")
+		a.UI.Err("Usage: supawho use <name>")
 		return errHandled
 	}
 	token, err := a.Store.Get(name)
 	if errors.Is(err, store.ErrNotFound) {
-		fmt.Fprintf(a.Out, "Account '%s' not found. Run 'supawho list' to see saved accounts.\n", name)
+		a.UI.Err("Account '%s' not found. Run 'supawho list' to see saved accounts.", name)
 		return errHandled
 	}
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(a.Out, "Logging in as '%s'...\n", name)
+	a.UI.Info("Logging in as '%s'...", name)
 	if err := a.Login(token); err != nil {
 		return err
 	}
-	fmt.Fprintf(a.Out, "Logged in as '%s'.\n", name)
+	a.UI.OK("Logged in as '%s'.", name)
 	return nil
 }

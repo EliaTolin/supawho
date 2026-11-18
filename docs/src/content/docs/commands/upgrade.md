@@ -24,8 +24,8 @@ supawho upgrade
 
 ```
 Checking for updates...
-Updating 1.6.2 → 1.7.0...
-Updated to 1.7.0.
+Updating 1.8.0 → 1.9.0...
+Updated to 1.9.0.
 ```
 
 ## Package-manager installs

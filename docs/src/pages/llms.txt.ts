@@ -23,6 +23,8 @@ export const GET: APIRoute = async () => {
 		'- `supawho use <name>`: log the Supabase CLI in as that account',
 		'- `supawho whoami`: show the email and organizations behind each saved account',
 		'- `supawho find <project-ref>`: find which saved account owns a project',
+		'- `supawho projects [name]`: list the projects of each saved account',
+		'- `supawho doctor`: check that saved tokens are still valid and the environment is healthy',
 		'',
 		`Every page below is plain markdown. The whole documentation in one file: ${SITE}/llms-full.txt`,
 	];

@@ -68,3 +68,4 @@ The non-zero exit on "not found" makes `find` usable in scripts.
 - [See the email and organizations behind each account with `supawho whoami`](/commands/whoami/)
 - [Switch to the account that owns the project](/commands/use/)
 - [Using `find` in scripts](/guides/ci-and-automation/#local-scripts)
+- [List every project of an account with `supawho projects`](/commands/projects/)

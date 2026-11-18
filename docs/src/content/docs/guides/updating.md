@@ -11,7 +11,7 @@ supawho tells you when a new version ships and can update itself on any OS.
 When you run a normal command, supawho checks GitHub for a newer release (at most once a day) and prints a short notice:
 
 ```
-A new version of supawho is available: 1.6.2 → 1.7.0
+A new version of supawho is available: 1.8.0 → 1.9.0
 Run 'supawho upgrade' to update.
 ```
 

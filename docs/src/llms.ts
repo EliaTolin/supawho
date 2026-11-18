@@ -35,6 +35,8 @@ const SECTIONS: { title: string; ids: string[] }[] = [
 			'commands/list',
 			'commands/whoami',
 			'commands/find',
+			'commands/projects',
+			'commands/doctor',
 			'commands/rename',
 			'commands/remove',
 			'commands/upgrade',

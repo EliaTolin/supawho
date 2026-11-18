@@ -1,7 +1,7 @@
 ---
 title: supawho commands
-description: Every supawho command at a glance, with aliases. add, use, list, whoami, find, rename, remove, upgrade, version and help, each linked to its reference page.
-lastUpdated: 2026-11-17
+description: Every supawho command at a glance, with aliases. add, use, list, whoami, find, projects, doctor, rename, remove, upgrade and version, each linked to its page.
+lastUpdated: 2026-11-18
 ---
 
 supawho has a small, focused command set. Each one has its own reference page with syntax, examples and exit codes.
@@ -15,6 +15,8 @@ supawho has a small, focused command set. Each one has its own reference page wi
 | [`supawho list`](/commands/list/) | List saved accounts |
 | [`supawho whoami [name]`](/commands/whoami/) | Reveal the email + organizations behind each account |
 | [`supawho find <project-ref>`](/commands/find/) | Find which account owns a project |
+| [`supawho projects [name]`](/commands/projects/) | List the projects of each account |
+| [`supawho doctor [name]`](/commands/doctor/) | Check token validity and system health |
 | [`supawho rename <old> <new>`](/commands/rename/) | Rename a saved account |
 | [`supawho remove <name>`](/commands/remove/) | Delete an account |
 | [`supawho upgrade`](/commands/upgrade/) | Update to the latest version |
@@ -27,6 +29,7 @@ supawho has a small, focused command set. Each one has its own reference page wi
 |---|---|
 | `whoami` | `who` |
 | `find` | `locate` |
+| `doctor` | `check` |
 | `upgrade` | `update` |
 | `version` | `--version`, `-v` |
 | `help` | `--help`, `-h` |
