@@ -59,21 +59,21 @@ type progress struct {
 // Doctor checks every saved token (or just one) against the Supabase API plus
 // the local environment, prints the report and fails when anything is broken.
 func (a *App) Doctor(args []string) error {
-	target, jsonOut, ok := parseDoctorArgs(args)
+	target, jsonOut, ok := parseNameArgs(args)
 	if !ok {
-		return a.doctorError(jsonOut, doctorUsage)
+		return a.fail(jsonOut, doctorUsage)
 	}
 	if a.Profile == nil {
-		return a.doctorError(jsonOut, "doctor is not available in this build")
+		return a.fail(jsonOut, "doctor is not available in this build")
 	}
 
 	names, err := a.Store.List()
 	if err != nil {
-		return a.doctorError(jsonOut, err.Error())
+		return a.fail(jsonOut, err.Error())
 	}
 	if target != "" {
 		if !slices.Contains(names, target) {
-			return a.doctorError(jsonOut, fmt.Sprintf("Account '%s' not found. Run 'supawho list' to see saved accounts.", target))
+			return a.fail(jsonOut, fmt.Sprintf("Account '%s' not found. Run 'supawho list' to see saved accounts.", target))
 		}
 		names = []string{target}
 	}
@@ -97,9 +97,9 @@ func (a *App) Doctor(args []string) error {
 	return nil
 }
 
-// doctorError reports a usage or setup error and fails. With --json it is a
-// JSON object, so stdout stays machine-readable even when doctor can't run.
-func (a *App) doctorError(jsonOut bool, msg string) error {
+// fail reports a usage or setup error and fails. With --json it is a
+// JSON object, so stdout stays machine-readable even when the command can't run.
+func (a *App) fail(jsonOut bool, msg string) error {
 	if !jsonOut {
 		a.UI.Err("%s", msg)
 		return errHandled
@@ -114,9 +114,9 @@ func (a *App) doctorError(jsonOut bool, msg string) error {
 	return errHandled
 }
 
-// parseDoctorArgs accepts at most one account name and the --json flag.
+// parseNameArgs accepts at most one account name and the --json flag.
 // jsonOut is reported even when ok is false, so errors can match the format.
-func parseDoctorArgs(args []string) (target string, jsonOut, ok bool) {
+func parseNameArgs(args []string) (target string, jsonOut, ok bool) {
 	jsonOut = slices.Contains(args, "--json")
 	for _, arg := range args {
 		switch {

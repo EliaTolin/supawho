@@ -62,6 +62,7 @@ export default defineConfig({
 						{ label: 'list', slug: 'commands/list' },
 						{ label: 'whoami', slug: 'commands/whoami' },
 						{ label: 'find', slug: 'commands/find' },
+						{ label: 'projects', slug: 'commands/projects' },
 						{ label: 'doctor', slug: 'commands/doctor' },
 						{ label: 'rename', slug: 'commands/rename' },
 						{ label: 'remove', slug: 'commands/remove' },

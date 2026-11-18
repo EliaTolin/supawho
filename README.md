@@ -173,6 +173,7 @@ supawho add myproject sbp_xxxxxxxxxxxxx
 | `supawho list` | Show all saved accounts |
 | `supawho whoami [name]` | Reveal the email + organizations behind each account |
 | `supawho find <project-ref>` | Find which account owns a project |
+| `supawho projects [name]` | List the projects of each account (`--json` for scripts) |
 | `supawho doctor [name]` | Check token validity and system health (`--json` for scripts) |
 | `supawho rename <old> <new>` | Rename a saved account |
 | `supawho remove <name>` | Delete an account |
@@ -227,6 +228,19 @@ $ supawho find sjslmvggunljemhwbkgm
   Account       aurora
 
   Switch to it:  supawho use aurora
+```
+
+### What's in each account?
+
+`supawho projects` lists every project an account can reach, with its reference, organization, region and status. Add a name to list a single account, or `--json` for scripts.
+
+```
+$ supawho projects client-a
+
+  client-a (2)
+  PROJECT    REFERENCE             ORGANIZATION  REGION        STATUS
+  api        abcdefghijklmnopqrst  Client A      eu-central-1  ACTIVE_HEALTHY
+  api-dev    tsrqponmlkjihgfedcba  Client A      eu-central-1  INACTIVE
 ```
 
 <br>
