@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/EliaTolin/supawho/compare/v1.7.0...v1.8.0) (2026-11-18)
+
+
+### Features
+
+* **doctor:** add supawho doctor to check tokens and environment health ([#29](https://github.com/EliaTolin/supawho/issues/29)) ([b478494](https://github.com/EliaTolin/supawho/commit/b478494c9a645614d0d705ffe17836aeacf8b1ac))
+
 ## [1.7.0](https://github.com/EliaTolin/supawho/compare/v1.6.2...v1.7.0) (2026-11-17)
 
 
