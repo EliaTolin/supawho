@@ -1,6 +1,7 @@
 ---
 title: supawho doctor
-description: Health check for supawho — verify that every saved Supabase access token is still valid, and that the Supabase CLI, the active login and supawho itself are in good shape.
+description: Check that every saved Supabase access token is still valid and that the Supabase CLI, the active login and supawho itself are in good shape.
+lastUpdated: 2026-11-18
 ---
 
 `doctor` tells you at a glance which saved tokens still work, which ones were revoked, and whether your environment is healthy. Every problem comes with the command that fixes it.

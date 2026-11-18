@@ -1,5 +1,6 @@
 ---
 title: supawho upgrade
+lastUpdated: 2026-11-17
 description: Update supawho to the latest release. Downloads the new binary, verifies its checksum, and swaps it in place — or defers to your package manager.
 ---
 
@@ -23,8 +24,8 @@ supawho upgrade
 
 ```
 Checking for updates...
-Updating 1.5.0 → 1.6.0...
-Updated to 1.6.0.
+Updating 1.8.0 → 1.9.0...
+Updated to 1.9.0.
 ```
 
 ## Package-manager installs
@@ -40,6 +41,8 @@ supawho was installed via Homebrew (run: brew upgrade supawho).
 | Homebrew (macOS) | `brew upgrade supawho` |
 | Install script / raw binary | `supawho upgrade` |
 | `.deb` / `.rpm` / `.apk` | your system package manager |
+
+`supawho update` is an alias of `upgrade`.
 
 ## Related
 

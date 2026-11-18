@@ -1,5 +1,6 @@
 ---
 title: supawho rename
+lastUpdated: 2026-11-17
 description: Rename a saved Supabase account. The stored token is carried over to the new name.
 ---
 
@@ -30,4 +31,6 @@ Account 'old-gig' renamed to 'acme'.
 
 ## See also
 
-- [`add`](/commands/add/) · [`remove`](/commands/remove/) · [`list`](/commands/list/)
+- [Save a new account](/commands/add/)
+- [Remove an account](/commands/remove/)
+- [List saved accounts](/commands/list/)

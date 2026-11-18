@@ -1,6 +1,7 @@
 ---
 title: supawho (interactive)
-description: Run supawho with no arguments to pick a Supabase account from an interactive menu and log in.
+description: Run supawho with no arguments to pick one of your saved Supabase accounts from an interactive menu and log the Supabase CLI in as it.
+lastUpdated: 2026-11-17
 ---
 
 Running `supawho` with no arguments opens an interactive picker: choose an account by number and supawho logs you in.
@@ -38,5 +39,5 @@ Logged in as 'another-project'.
 
 ## See also
 
-- [`use`](/commands/use/) — switch to a specific account by name
-- [`list`](/commands/list/) — see saved accounts
+- [Switch to a specific account by name](/commands/use/)
+- [List saved accounts](/commands/list/)

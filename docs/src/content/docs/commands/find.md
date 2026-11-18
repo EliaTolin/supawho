@@ -1,5 +1,6 @@
 ---
 title: supawho find
+lastUpdated: 2026-11-17
 description: Reverse lookup for Supabase projects — paste a project ref and supawho tells you which saved account owns it, with organization, region, status and email.
 ---
 
@@ -16,31 +17,34 @@ supawho find <project-ref>
 ## Example — found
 
 ```bash
-supawho find sjslmvggunljemhwbkgm
+supawho find abcdefghijklmnopqrst
 ```
 
 ```
-  ✓ Found in account 'aurora'
+Searching 3 account(s) for "abcdefghijklmnopqrst"...
 
-  Project       almanaccolo
-  Reference     sjslmvggunljemhwbkgm
-  Organization  AuroraDigital
+  ✓ Found in account 'client-a'
+
+  Project       storefront
+  Reference     abcdefghijklmnopqrst
+  Organization  Client A
   Region        eu-central-1
   Status        ACTIVE_HEALTHY
-  Email         mail@auroradigital.it
-  Account       aurora
+  Email         you@example.com
+  Account       client-a
 
-  Switch to it:  supawho use aurora
+  Switch to it:  supawho use client-a
 ```
 
 ## Example — not found
 
 ```bash
-supawho find abcdefghijklmnopqrst
+supawho find zyxwvutsrqponmlkjihg
 ```
 
 ```
-No project matching "abcdefghijklmnopqrst" in any saved account.
+Searching 3 account(s) for "zyxwvutsrqponmlkjihg"...
+No project matching "zyxwvutsrqponmlkjihg" in any saved account.
 ```
 
 ## Exit codes
@@ -57,7 +61,11 @@ The non-zero exit on "not found" makes `find` usable in scripts.
 
 - Searches each account's projects via the Management API (`GET /v1/projects`) and resolves the organization name.
 - A revoked token skips that account and the search continues.
+- `supawho locate` is an alias of `find`.
 
 ## See also
 
-- [`projects`](/commands/projects/) · [`whoami`](/commands/whoami/) · [`use`](/commands/use/)
+- [See the email and organizations behind each account with `supawho whoami`](/commands/whoami/)
+- [Switch to the account that owns the project](/commands/use/)
+- [Using `find` in scripts](/guides/ci-and-automation/#local-scripts)
+- [List every project of an account with `supawho projects`](/commands/projects/)

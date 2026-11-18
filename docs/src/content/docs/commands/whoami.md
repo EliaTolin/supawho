@@ -1,5 +1,6 @@
 ---
 title: supawho whoami
+lastUpdated: 2026-11-17
 description: Reveal the real email and organizations behind each saved Supabase account, so you can tell which account is which.
 ---
 
@@ -38,8 +39,9 @@ supawho whoami client-a
 - Queries the Supabase Management API (`/v1/profile` and `/v1/organizations`) with each account's token.
 - A revoked or invalid token is reported on its own row without failing the rest.
 - If a token can't read its profile but can list organizations, the row shows them with `(unavailable)` as the email.
+- `supawho who` is an alias of `whoami`.
 
 ## See also
 
-- [`find`](/commands/find/) — the reverse lookup: which account owns a project?
-- [How it works](/guides/how-it-works/)
+- [Find which account owns a project with `supawho find`](/commands/find/)
+- [How supawho talks to the Supabase Management API](/guides/how-it-works/#identity-lookups-use-the-management-api)

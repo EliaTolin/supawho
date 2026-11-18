@@ -118,22 +118,34 @@
 	background: var(--sl-color-gray-6);
 }
 
-/* Install command chip, centered under the hero */
+/* Install tabs, centered under the hero */
 .hx-install {
-	display: table;
+	max-width: 640px;
 	margin: 1.75rem auto 0;
-	font-family: var(--sl-font-mono);
-	font-size: 0.85rem;
-	background: var(--sl-color-gray-7);
-	border: 1px solid var(--sl-color-gray-5);
-	border-radius: 8px;
-	padding: 9px 16px;
+}
+.hx-install starlight-tabs [role='tablist'] {
+	justify-content: center;
+}
+
+/* Trust strip under the install command */
+.hx-trust {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.35rem 1.5rem;
+	margin: 1.25rem auto 0;
+	padding: 0;
+	list-style: none;
+	font-size: 0.875rem;
 	color: var(--sl-color-gray-2);
 }
-.hx-dollar {
+.hx-trust li {
+	margin: 0;
+}
+.hx-trust li::before {
+	content: '✓';
 	color: var(--sb-green);
-	margin-right: 8px;
-	user-select: none;
+	margin-right: 0.4rem;
 }
 
 /* Terminal — the product shot, centered */
