@@ -7,12 +7,14 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -134,6 +136,49 @@ func TestUpgradeRejectsTamperedArchive(t *testing.T) {
 	got, _ := os.ReadFile(target)
 	if !bytes.Equal(got, original) {
 		t.Fatalf("tampered update modified the binary! got %q", got)
+	}
+}
+
+// TestUpgradeUnwritableDir covers a binary in a root-owned directory, such as
+// the install script's default /usr/local/bin: the error must suggest sudo.
+func TestUpgradeUnwritableDir(t *testing.T) {
+	if os.Geteuid() <= 0 {
+		t.Skip("needs a unix directory the current user cannot write to")
+	}
+
+	archive := makeTarGz(t, "supawho", []byte("new binary"))
+	name := ArchiveName("9.9.9")
+	sum := sha256.Sum256(archive)
+	checksums := fmt.Sprintf("%s  %s\n", hex.EncodeToString(sum[:]), name)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/archive", func(w http.ResponseWriter, r *http.Request) { w.Write(archive) })
+	mux.HandleFunc("/sums", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(checksums)) })
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+	mux.HandleFunc("/latest", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `{"tag_name":"v9.9.9","assets":[
+			{"name":%q,"browser_download_url":"%s/archive"},
+			{"name":"checksums.txt","browser_download_url":"%s/sums"}]}`, name, srv.URL, srv.URL)
+	})
+
+	orig := latestAPI
+	latestAPI = srv.URL + "/latest"
+	defer func() { latestAPI = orig }()
+
+	dir := t.TempDir()
+	target := filepath.Join(dir, "supawho")
+	if err := os.WriteFile(target, []byte("OLD BINARY v1.0.0"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(dir, 0o555); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chmod(dir, 0o755) // so t.TempDir can clean up
+
+	err := upgradeBinary(context.Background(), srv.Client(), "1.0.0", target, &bytes.Buffer{})
+	if !errors.Is(err, os.ErrPermission) || !strings.Contains(err.Error(), "sudo "+target+" upgrade") {
+		t.Fatalf("err = %v, want a permission error that suggests sudo", err)
 	}
 }
 

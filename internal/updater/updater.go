@@ -318,6 +318,10 @@ func upgradeBinary(ctx context.Context, client *http.Client, current, execPath s
 		if rerr := selfupdate.RollbackError(err); rerr != nil {
 			return fmt.Errorf("update failed and rollback failed: %w", rerr)
 		}
+		// sudo can't help root, and Geteuid is -1 on Windows.
+		if errors.Is(err, os.ErrPermission) && os.Geteuid() > 0 {
+			return fmt.Errorf("%w (run: sudo %s upgrade)", err, execPath)
+		}
 		return err
 	}
 
