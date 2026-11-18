@@ -1,6 +1,6 @@
 ---
 title: supawho projects
-description: List the Supabase projects of every saved account, or of one account: name, reference, organization, region and status. JSON output for scripts.
+description: List the Supabase projects of every saved account or of a single one, with name, reference, organization, region and status. JSON output for scripts.
 lastUpdated: 2026-11-18
 ---
 
