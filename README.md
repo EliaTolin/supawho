@@ -45,6 +45,7 @@ One command to jump between projects and clients. 🔍
 |---|---|
 | 🔐 **Secure by design** | Tokens live in the OS secret store — encrypted, never written to a file |
 | 🔎 **Know who is who** | `supawho whoami` maps every account to its real email + organizations |
+| 🩺 **Health check** | `supawho doctor` flags revoked tokens and environment issues, with the fix for each |
 | 🖥️ **Truly cross-platform** | One static binary for macOS, Linux and Windows. No runtime to install |
 | ⚡ **Instant switching** | `supawho use client-a` and you're logged in |
 | 🔄 **Self-updating** | `supawho upgrade` keeps you current on any OS |
@@ -172,6 +173,7 @@ supawho add myproject sbp_xxxxxxxxxxxxx
 | `supawho list` | Show all saved accounts |
 | `supawho whoami [name]` | Reveal the email + organizations behind each account |
 | `supawho find <project-ref>` | Find which account owns a project |
+| `supawho doctor [name]` | Check token validity and system health (`--json` for scripts) |
 | `supawho rename <old> <new>` | Rename a saved account |
 | `supawho remove <name>` | Delete an account |
 | `supawho upgrade` | Update to the latest version |

@@ -4,7 +4,11 @@
 package main
 
 import (
+	"context"
+	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/EliaTolin/supawho/internal/cli"
 	"github.com/EliaTolin/supawho/internal/store"
@@ -34,6 +38,15 @@ func main() {
 			}
 			return out, nil
 		},
+		ActiveToken: supabase.ActiveToken,
+		CLIInfo:     supabase.CLIInfo,
+		Latest: func(ctx context.Context) (string, error) {
+			rel, err := updater.FetchLatest(ctx, &http.Client{Timeout: 5 * time.Second})
+			if err != nil {
+				return "", err
+			}
+			return strings.TrimPrefix(rel.TagName, "v"), nil
+		},
 		In:      os.Stdin,
 		Out:     os.Stdout,
 		Version: current,
@@ -46,10 +59,11 @@ func main() {
 	code := app.Run(os.Args[1:])
 
 	// Passive "update available" notice: only for everyday interactive use.
-	// Skipped for upgrade/version/help and when output is not a terminal
+	// Skipped for upgrade/version/help, for doctor (which checks the version
+	// itself), and when output is not a terminal
 	// (pipes, scripts), so it never pollutes machine-readable output.
 	switch cmd {
-	case "upgrade", "update", "version", "--version", "-v", "help", "--help", "-h":
+	case "upgrade", "update", "version", "--version", "-v", "help", "--help", "-h", "doctor", "check":
 	default:
 		if term.IsTerminal(int(os.Stdout.Fd())) {
 			updater.MaybeNotify(current, os.Stderr)

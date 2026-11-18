@@ -4,18 +4,16 @@
 package cli
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
 	"io"
-	"os"
-	"strconv"
 	"strings"
+	"time"
 
+	"github.com/EliaTolin/supawho/internal/cli/ui"
 	"github.com/EliaTolin/supawho/internal/store"
 	"github.com/EliaTolin/supawho/internal/updater"
-	"golang.org/x/term"
 )
 
 // LoginFunc performs the actual `supabase login --token` call.
@@ -50,9 +48,20 @@ type App struct {
 	Out     io.Writer
 	Version string
 
-	// readSecret reads a secret without echoing; overridable in tests.
-	readSecret func(prompt string) (string, error)
-	reader     *bufio.Reader
+	// Doctor probes. ActiveToken reports the token the supabase CLI uses and
+	// where it came from; CLIInfo locates the CLI; Latest returns the newest
+	// supawho release without the leading "v".
+	ActiveToken func() (token, source string, err error)
+	CLIInfo     func() (path, version string, err error)
+	Latest      func(ctx context.Context) (string, error)
+
+	// UI and Prompt handle presentation and interactive input. Both default
+	// from In/Out on first Run, so tests only need to set In/Out.
+	UI     *ui.UI
+	Prompt ui.Prompter
+
+	// now times the token checks; defaults to time.Now.
+	now func() time.Time
 }
 
 // errHandled signals a user-facing failure whose message was already printed;
@@ -61,11 +70,11 @@ var errHandled = errors.New("handled")
 
 // Run dispatches args and returns the process exit code.
 func (a *App) Run(args []string) int {
-	if a.reader == nil {
-		a.reader = bufio.NewReader(a.In)
+	if a.UI == nil {
+		a.UI = ui.New(a.Out)
 	}
-	if a.readSecret == nil {
-		a.readSecret = a.defaultReadSecret
+	if a.Prompt == nil {
+		a.Prompt = ui.NewPrompter(a.In, a.Out)
 	}
 
 	var err error
@@ -84,6 +93,8 @@ func (a *App) Run(args []string) int {
 		err = a.Whoami(arg(args, 1))
 	case "find", "locate":
 		err = a.Find(arg(args, 1))
+	case "doctor", "check":
+		err = a.Doctor(args[1:])
 	case "upgrade", "update":
 		err = a.runUpgrade()
 	case "version", "--version", "-v":
@@ -93,8 +104,8 @@ func (a *App) Run(args []string) int {
 	case "":
 		err = a.Interactive()
 	default:
-		fmt.Fprintf(a.Out, "Unknown command: %s\n", cmd)
-		fmt.Fprintln(a.Out, "Run 'supawho help' for usage.")
+		a.UI.Err("Unknown command: %s", cmd)
+		a.UI.Hint("Run 'supawho help' for usage.")
 		return 1
 	}
 
@@ -104,7 +115,7 @@ func (a *App) Run(args []string) int {
 		case errors.Is(err, store.ErrLocked):
 			a.keychainLocked()
 		default:
-			fmt.Fprintf(a.Out, "supawho: %v\n", err)
+			a.UI.Err("%v", err)
 		}
 		return 1
 	}
@@ -131,7 +142,7 @@ func (a *App) runUpgrade() error {
 	err := a.Upgrade(context.Background(), a.Version, a.Out)
 	var managed *updater.ErrManaged
 	if errors.As(err, &managed) {
-		fmt.Fprintf(a.Out, "supawho was installed via %s.\n", managed.Manager)
+		a.UI.Info("supawho was installed via %s.", managed.Manager)
 		return nil
 	}
 	return err
@@ -144,26 +155,6 @@ func arg(args []string, i int) string {
 	return ""
 }
 
-// --- input helpers ---
-
-func (a *App) prompt(label string) string {
-	fmt.Fprint(a.Out, label)
-	line, _ := a.reader.ReadString('\n')
-	return strings.TrimRight(line, "\r\n")
-}
-
-func (a *App) defaultReadSecret(label string) (string, error) {
-	fmt.Fprint(a.Out, label)
-	if f, ok := a.In.(*os.File); ok && term.IsTerminal(int(f.Fd())) {
-		b, err := term.ReadPassword(int(f.Fd()))
-		fmt.Fprintln(a.Out)
-		return string(b), err
-	}
-	// Non-terminal (tests, pipes): read a plain line.
-	line, _ := a.reader.ReadString('\n')
-	return strings.TrimRight(line, "\r\n"), nil
-}
-
 // validateName mirrors the original: names may not contain commas or whitespace,
 // since the index is a comma-separated list.
 func validateName(name string) error {
@@ -171,13 +162,4 @@ func validateName(name string) error {
 		return errors.New("account name may not contain commas or whitespace")
 	}
 	return nil
-}
-
-// parseSelection parses a 1-based menu choice against n items.
-func parseSelection(s string, n int) (int, bool) {
-	i, err := strconv.Atoi(strings.TrimSpace(s))
-	if err != nil || i < 1 || i > n {
-		return 0, false
-	}
-	return i - 1, true
 }

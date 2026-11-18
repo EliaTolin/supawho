@@ -1,6 +1,7 @@
 package supabase
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -49,8 +50,8 @@ func TestWhoamiUnauthorized(t *testing.T) {
 	apiBase = srv.URL
 	defer func() { apiBase = orig }()
 
-	if _, err := Whoami("revoked"); err == nil {
-		t.Fatal("expected error for revoked token")
+	if _, err := Whoami("revoked"); !errors.Is(err, ErrUnauthorized) {
+		t.Fatalf("err = %v, want ErrUnauthorized", err)
 	}
 }
 
