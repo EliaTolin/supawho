@@ -1,6 +1,7 @@
 ---
 title: supawho list
-description: List the names of every Supabase account saved in supawho.
+description: List the names of every Supabase account saved in supawho. Names only; use whoami to see the email and organizations behind each.
+lastUpdated: 2026-11-17
 ---
 
 List the names of all saved accounts.
@@ -31,5 +32,5 @@ Saved accounts:
 
 ## See also
 
-- [`whoami`](/commands/whoami/) — names plus emails and organizations
-- [`add`](/commands/add/)
+- [Show emails and organizations with `supawho whoami`](/commands/whoami/)
+- [Save another account](/commands/add/)

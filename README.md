@@ -15,13 +15,15 @@
 
 ### Switch between multiple **Supabase** accounts in seconds — on any OS.
 
-Your access tokens live in your operating system's **native secret vault**, never on disk.<br>
+Your access tokens live in your operating system's **native secret vault**: supawho never writes them to a file.<br>
 One command to jump between projects and clients. 🔍
+
+**[Documentation → supawho.dev](https://supawho.dev)**
 
 <br>
 
 [![Release](https://img.shields.io/github/v/release/EliaTolin/supawho?style=for-the-badge&color=3FCF8E&label=version)](https://github.com/EliaTolin/supawho/releases)
-[![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=fff)](#)
+[![Docs](https://img.shields.io/badge/docs-supawho.dev-3FCF8E?style=for-the-badge&logo=supabase&logoColor=fff)](https://supawho.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
 [![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=fff)](#-installation)
@@ -35,7 +37,7 @@ One command to jump between projects and clients. 🔍
 > ### Juggling multiple Supabase accounts?
 > Tired of the endless `supabase logout` → `supabase login` → paste token dance every time you switch project or client?
 >
-> **supawho** saves each account once and lets you jump between them in seconds — securely, with **no tokens on disk**.
+> **supawho** saves each account once and lets you jump between them in seconds, with your tokens kept in the **OS secret vault** instead of a file.
 
 <br>
 
@@ -59,12 +61,14 @@ One command to jump between projects and clients. 🔍
 brew install EliaTolin/tap/supawho
 
 # 2. Use it
-supawho add work sbp_your_token   # save an account (once)
-supawho use work                  # switch to it in a second
-supawho whoami                    # forgot which is which? map them all
+supawho add          # save an account (once): asks for a name and the token, input hidden
+supawho use work     # switch to it in a second
+supawho whoami       # forgot which is which? map them all
 ```
 
 > Not on macOS? Grab your one-liner from [Installation](#-installation) — `install.sh` for Linux, `install.ps1` for Windows.
+>
+> Full walkthrough: [Get started with supawho](https://supawho.dev/guides/getting-started/).
 
 <br>
 
@@ -102,7 +106,7 @@ curl -fsSL https://raw.githubusercontent.com/EliaTolin/supawho/main/install.sh |
 
 <br>
 
-Download the package for your distro from the [releases page](https://github.com/EliaTolin/supawho/releases), then:
+Download the package for your distro and CPU (`x86_64` or `arm64`) from the [releases page](https://github.com/EliaTolin/supawho/releases), then:
 
 ```bash
 # Debian / Ubuntu
@@ -130,7 +134,7 @@ irm https://raw.githubusercontent.com/EliaTolin/supawho/main/install.ps1 | iex
 
 <br>
 
-Download `supawho_*_Windows_x86_64.zip` from the [releases page](https://github.com/EliaTolin/supawho/releases), extract `supawho.exe`, and add it to your `PATH`.
+Download the Windows `.zip` for your CPU (`x86_64` or `arm64`) from the [releases page](https://github.com/EliaTolin/supawho/releases), extract `supawho.exe`, and add it to your `PATH`.
 
 </details>
 
@@ -154,11 +158,13 @@ go install .
 
 > 💡 The token starts with `sbp_` and is shown **only once** — copy it right away.
 
-Then save it:
+Then save it. `supawho add` asks for a name and the token, and hides the token as you paste it, so it stays out of your shell history:
 
 ```bash
-supawho add myproject sbp_xxxxxxxxxxxxx
+supawho add
 ```
+
+For scripts there is a one-line form, `supawho add <name> "$SUPABASE_TOKEN"`. Avoid typing a literal token on the command line: it ends up in your shell history.
 
 <br>
 
@@ -167,7 +173,8 @@ supawho add myproject sbp_xxxxxxxxxxxxx
 | Command | Description |
 |---|---|
 | `supawho` | Interactive account picker |
-| `supawho add <name> <token>` | Save a new account |
+| `supawho add` | Save a new account (guided, hidden token input) |
+| `supawho add <name> <token>` | Save a new account in one line, for scripts |
 | `supawho use <name>` | Switch to an account |
 | `supawho list` | Show all saved accounts |
 | `supawho whoami [name]` | Reveal the email + organizations behind each account |
@@ -176,6 +183,8 @@ supawho add myproject sbp_xxxxxxxxxxxxx
 | `supawho remove <name>` | Delete an account |
 | `supawho upgrade` | Update to the latest version |
 | `supawho version` | Print the installed version |
+
+Every command has its own page in the [command reference](https://supawho.dev/commands/).
 
 ### Interactive mode
 
@@ -212,19 +221,19 @@ Add a name to look up a single account: `supawho whoami client-a`.
 The reverse lookup: paste a Supabase project ref and `supawho find` tells you which saved account it lives in.
 
 ```
-$ supawho find sjslmvggunljemhwbkgm
+$ supawho find abcdefghijklmnopqrst
 
-  ✓ Found in account 'aurora'
+  ✓ Found in account 'client-a'
 
-  Project       almanaccolo
-  Reference     sjslmvggunljemhwbkgm
-  Organization  AuroraDigital
+  Project       storefront
+  Reference     abcdefghijklmnopqrst
+  Organization  Client A
   Region        eu-central-1
   Status        ACTIVE_HEALTHY
-  Email         mail@auroradigital.it
-  Account       aurora
+  Email         you@example.com
+  Account       client-a
 
-  Switch to it:  supawho use aurora
+  Switch to it:  supawho use client-a
 ```
 
 <br>
@@ -251,7 +260,7 @@ It downloads the latest release, **verifies its checksum**, and swaps the binary
 
 ## 🔒 Why is it secure?
 
-Your tokens **never touch the filesystem**. They live in your operating system's native secret store — the same encrypted vault the OS uses for passwords and certificates:
+supawho **never writes your tokens to a file**. They live in your operating system's native secret store — the same encrypted vault the OS uses for passwords and certificates:
 
 - **macOS** → Keychain
 - **Linux** → Secret Service (GNOME Keyring / KWallet, via `libsecret`)
@@ -261,8 +270,15 @@ Your tokens **never touch the filesystem**. They live in your operating system's
 |---|:---:|:---:|
 | Encrypted at rest | ✅ | ❌ |
 | Protected by system login | ✅ | ❌ |
-| Hidden from other processes | ✅ | ❌ |
 | Survives an accidental `git add .` | ✅ | ❌ |
+
+What this does not cover, so you can judge for yourself:
+
+- To switch account, supawho runs `supabase login --token <token>`. For that brief moment the token is visible in the process list to other processes running as your user.
+- After the switch, the Supabase CLI keeps the active token in its own storage: the OS keyring when available, otherwise a plain-text file under `~/.supabase`.
+- The only file supawho writes is a timestamp for the daily update check. It contains no token.
+
+The full picture is in the [security model](https://supawho.dev/guides/security/).
 
 <br>
 
@@ -280,13 +296,15 @@ Your tokens **never touch the filesystem**. They live in your operating system's
 Run `supawho list` to check the exact name — account names are case-sensitive.
 
 **The token stops working after switching**
-Confirm it's still valid in [Supabase Dashboard → Access Tokens](https://supabase.com/dashboard/account/tokens), then re-add the account with a fresh one: `supawho add <name> <token>`.
+Confirm it's still valid in [Supabase Dashboard → Access Tokens](https://supabase.com/dashboard/account/tokens), then run `supawho add` again with the same name and a fresh token: it replaces the saved one.
 
 **Linux: `Cannot create an item in a locked collection`**
 Your keyring is locked or no Secret Service is running. Unlock your login keyring (GNOME Keyring / KWallet) and try again.
 
 **`supawho upgrade` says it's managed by a package manager**
 That's on purpose — update through the manager you installed it with (see the table above).
+
+More cases, with the exact error messages, are in the [troubleshooting guide](https://supawho.dev/guides/troubleshooting/).
 
 <br>
 

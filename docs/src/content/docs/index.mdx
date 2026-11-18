@@ -1,11 +1,15 @@
 ---
-title: supawho — manage multiple Supabase accounts
-description: supawho is a free, open-source CLI to switch between multiple Supabase accounts in seconds on macOS, Linux and Windows. Access tokens stay in your OS secret vault, never on disk.
+title: Switch between multiple Supabase accounts
+description: supawho is a free, open-source CLI to save multiple Supabase accounts and switch between them in seconds on macOS, Linux and Windows.
+lastUpdated: 2026-11-17
 template: splash
 tableOfContents: false
+head:
+  - tag: title
+    content: 'supawho: Switch Between Multiple Supabase Accounts'
 hero:
-  title: Manage multiple Supabase accounts
-  tagline: Switch between accounts in seconds — on macOS, Linux and Windows. Your tokens stay in the OS secret vault, never on disk.
+  title: Switch between multiple Supabase accounts
+  tagline: Save each account once, then switch the Supabase CLI with one command on macOS, Linux and Windows. Tokens are kept in your OS secret vault.
   actions:
     - text: Get started
       link: /guides/getting-started/
@@ -17,28 +21,53 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
 import Terminal from '../../components/Terminal.astro';
-import StructuredData from '../../components/StructuredData.astro';
+import { version } from '../../version.mjs';
 
-<div class="hx-install"><span class="hx-dollar">$</span>brew install EliaTolin/tap/supawho</div>
+<div class="hx-install">
 
-<StructuredData />
+<Tabs syncKey="os">
+	<TabItem label="macOS">
+		```bash wrap
+		brew install EliaTolin/tap/supawho
+		```
+	</TabItem>
+	<TabItem label="Linux">
+		```bash wrap
+		curl -fsSL https://raw.githubusercontent.com/EliaTolin/supawho/main/install.sh | bash
+		```
+	</TabItem>
+	<TabItem label="Windows">
+		```powershell wrap
+		irm https://raw.githubusercontent.com/EliaTolin/supawho/main/install.ps1 | iex
+		```
+	</TabItem>
+</Tabs>
+
+</div>
+
+<ul class="hx-trust">
+	<li>Open source</li>
+	<li>MIT license</li>
+	<li>Drives the official Supabase CLI</li>
+	<li><a href="https://github.com/EliaTolin/supawho/releases">v{version}</a></li>
+</ul>
 
 <Terminal />
 
 ## Manage every Supabase account from one CLI
 
-If you juggle a personal org, several clients and a work account, supawho ends the endless `supabase logout → login → paste token` dance. Save each **Supabase account** once, then switch in a second — on **macOS, Linux or Windows**, from a single dependency-free binary.
+The Supabase CLI holds one login at a time. If you juggle a personal org, several clients and a work account, supawho ends the `supabase logout → login → paste token` routine: save each **Supabase account** once, then switch by name, on **macOS, Linux or Windows**, from a single dependency-free binary.
 
 <CardGrid>
 	<Card title="Know who is who" icon="magnifier">
 		[`supawho whoami`](/commands/whoami/) maps every saved account to its real email and organizations.
 	</Card>
-	<Card title="Secure by design" icon="approve-check">
-		Tokens live in Keychain / Secret Service / Credential Manager — encrypted, never a file.
+	<Card title="Tokens in the OS vault" icon="approve-check">
+		Keychain, Secret Service or Credential Manager. supawho never writes a token to a file. [Read the security model](/guides/security/).
 	</Card>
-	<Card title="Truly cross-platform" icon="laptop">
+	<Card title="Cross-platform" icon="laptop">
 		One static binary for macOS, Linux and Windows. No runtime to install.
 	</Card>
 	<Card title="Reverse lookup" icon="random">
@@ -48,16 +77,16 @@ If you juggle a personal org, several clients and a work account, supawho ends t
 		[`supawho upgrade`](/commands/upgrade/) pulls the latest release, checksum-verified.
 	</Card>
 	<Card title="Installs everywhere" icon="download">
-		Homebrew, `.deb` / `.rpm` / `.apk`, or a one-line script.
+		Homebrew, `.deb` / `.rpm` / `.apk`, or a one-line script. [Install options](/guides/getting-started/#install).
 	</Card>
 </CardGrid>
 
 ## Switch accounts in three commands
 
 ```bash
-supawho add work sbp_your_token   # save a Supabase account once
-supawho use work                  # switch to it in a second
-supawho whoami                    # forgot which is which? map them all
+supawho add          # save an account once: name + token (hidden input)
+supawho use work     # switch the Supabase CLI to it
+supawho whoami       # forgot which is which? map them all
 ```
 
-Ready to try it? Head to [Getting started](/guides/getting-started/), or read [How it works](/guides/how-it-works/) for the model behind supawho.
+Ready to try it? Head to [Getting started](/guides/getting-started/). Comparing options first? Read [how to use multiple Supabase accounts with the CLI](/guides/multiple-supabase-accounts/) or [supawho vs. `supabase login` and `SUPABASE_ACCESS_TOKEN`](/guides/alternatives/).

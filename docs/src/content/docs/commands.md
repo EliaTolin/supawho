@@ -1,6 +1,7 @@
 ---
-title: Commands overview
-description: Every supawho command at a glance — add, use, list, whoami, find, rename, remove, upgrade and version — with links to each command's reference page.
+title: supawho commands
+description: Every supawho command at a glance, with aliases. add, use, list, whoami, find, rename, remove, upgrade, version and help, each linked to its reference page.
+lastUpdated: 2026-11-17
 ---
 
 supawho has a small, focused command set. Each one has its own reference page with syntax, examples and exit codes.
@@ -8,7 +9,8 @@ supawho has a small, focused command set. Each one has its own reference page wi
 | Command | Description |
 |---|---|
 | [`supawho`](/commands/interactive/) | Interactive account picker |
-| [`supawho add <name> <token>`](/commands/add/) | Save a new account |
+| [`supawho add`](/commands/add/) | Save a new account (asks for name and token) |
+| [`supawho add <name> <token>`](/commands/add/) | Save a new account in one line, for scripts |
 | [`supawho use <name>`](/commands/use/) | Switch to an account |
 | [`supawho list`](/commands/list/) | List saved accounts |
 | [`supawho whoami [name]`](/commands/whoami/) | Reveal the email + organizations behind each account |
@@ -17,9 +19,21 @@ supawho has a small, focused command set. Each one has its own reference page wi
 | [`supawho remove <name>`](/commands/remove/) | Delete an account |
 | [`supawho upgrade`](/commands/upgrade/) | Update to the latest version |
 | [`supawho version`](/commands/version/) | Print the installed version |
+| `supawho help` | Print the list of commands |
+
+## Aliases
+
+| Command | Also accepted |
+|---|---|
+| `whoami` | `who` |
+| `find` | `locate` |
+| `upgrade` | `update` |
+| `version` | `--version`, `-v` |
+| `help` | `--help`, `-h` |
 
 ## Conventions
 
 - `<required>` arguments are shown in angle brackets; `[optional]` in square brackets.
 - Commands that succeed exit with code `0`; handled errors (not found, bad input) exit with `1`.
-- Account names may not contain commas or whitespace.
+- Account names may not contain commas or whitespace, and are case-sensitive.
+- An unknown command prints `Unknown command: <name>` and exits with `1`.

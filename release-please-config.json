@@ -6,7 +6,10 @@
       "changelog-path": "CHANGELOG.md",
       "bump-minor-pre-major": false,
       "draft": false,
-      "prerelease": false
+      "prerelease": false,
+      "extra-files": [
+        "docs/src/version.mjs"
+      ]
     }
   }
 }

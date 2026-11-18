@@ -1,5 +1,6 @@
 ---
 title: supawho remove
+lastUpdated: 2026-11-17
 description: Delete a saved Supabase account from supawho, removing its token from the OS secret vault.
 ---
 
@@ -28,4 +29,6 @@ Account 'acme' removed.
 
 ## See also
 
-- [`list`](/commands/list/) · [`rename`](/commands/rename/)
+- [List saved accounts](/commands/list/)
+- [Rename an account instead](/commands/rename/)
+- [Removing and revoking tokens](/guides/security/#removing-and-revoking-tokens)

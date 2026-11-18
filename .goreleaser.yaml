@@ -47,7 +47,7 @@ nfpms:
   - id: linux-packages
     package_name: supawho
     vendor: Elia Tolin
-    homepage: "https://github.com/EliaTolin/supawho"
+    homepage: "https://supawho.dev"
     maintainer: "Elia Tolin <EliaTolin@users.noreply.github.com>"
     description: "Manage multiple Supabase CLI accounts securely across macOS, Linux and Windows"
     license: MIT
@@ -73,7 +73,7 @@ homebrew_casks:
       owner: EliaTolin
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    homepage: "https://github.com/EliaTolin/supawho"
+    homepage: "https://supawho.dev"
     description: "Manage multiple Supabase CLI accounts securely across macOS, Linux and Windows"
     # The binary is unsigned; strip the Gatekeeper quarantine flag on install
     # so it runs without "developer cannot be verified" prompts.
