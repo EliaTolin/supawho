@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/EliaTolin/supawho/compare/v1.8.0...v1.9.0) (2026-11-18)
+
+
+### Features
+
+* **projects:** add supawho projects to list each account's projects ([#31](https://github.com/EliaTolin/supawho/issues/31)) ([0df2550](https://github.com/EliaTolin/supawho/commit/0df25503c73bd9afee061c98869720dfe780de6e))
+
 ## [1.8.0](https://github.com/EliaTolin/supawho/compare/v1.7.0...v1.8.0) (2026-11-18)
 
 
