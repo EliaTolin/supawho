@@ -60,4 +60,4 @@ The non-zero exit on "not found" makes `find` usable in scripts.
 
 ## See also
 
-- [`whoami`](/commands/whoami/) · [`use`](/commands/use/)
+- [`projects`](/commands/projects/) · [`whoami`](/commands/whoami/) · [`use`](/commands/use/)

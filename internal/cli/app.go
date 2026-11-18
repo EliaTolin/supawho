@@ -93,6 +93,8 @@ func (a *App) Run(args []string) int {
 		err = a.Whoami(arg(args, 1))
 	case "find", "locate":
 		err = a.Find(arg(args, 1))
+	case "projects":
+		err = a.Projects(args[1:])
 	case "doctor", "check":
 		err = a.Doctor(args[1:])
 	case "upgrade", "update":

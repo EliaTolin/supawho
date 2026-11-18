@@ -13,6 +13,7 @@ func (a *App) help() {
 	fmt.Fprintln(a.Out, "  supawho use <name>             Login with specific account")
 	fmt.Fprintln(a.Out, "  supawho whoami [name]          Show the email behind each account")
 	fmt.Fprintln(a.Out, "  supawho find <project-ref>     Find which account owns a project")
+	fmt.Fprintln(a.Out, "  supawho projects [name]        List the projects of each account")
 	fmt.Fprintln(a.Out, "  supawho doctor [name]          Check token validity and system health")
 	fmt.Fprintln(a.Out, "  supawho upgrade                Update supawho to the latest version")
 	fmt.Fprintln(a.Out, "  supawho version                Show version")
