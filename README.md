@@ -111,13 +111,13 @@ Download the package for your distro and CPU (`x86_64` or `arm64`) from the [rel
 
 ```bash
 # Debian / Ubuntu
-sudo dpkg -i supawho_*_Linux_x86_64.deb
+sudo dpkg -i supawho_*_linux_amd64.deb
 
 # Fedora / RHEL
-sudo rpm -i supawho_*_Linux_x86_64.rpm
+sudo rpm -i supawho_*_linux_amd64.rpm
 
 # Alpine
-sudo apk add --allow-untrusted supawho_*_Linux_x86_64.apk
+sudo apk add --allow-untrusted supawho_*_linux_amd64.apk
 ```
 
 > ℹ️ Linux needs a Secret Service provider (GNOME Keyring, KWallet, …) running to store tokens.
