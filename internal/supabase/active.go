@@ -28,7 +28,7 @@ var userHomeDir = os.UserHomeDir
 // then the legacy key), then <SUPABASE_HOME or ~/.supabase>/access-token.
 // source is "env", "keychain" or "file". Unreadable sources are skipped.
 func ActiveToken() (token, source string, err error) {
-	if tok := strings.TrimSpace(os.Getenv("SUPABASE_ACCESS_TOKEN")); tok != "" {
+	if tok := strings.TrimSpace(os.Getenv(accessTokenEnv)); tok != "" {
 		return tok, "env", nil
 	}
 

@@ -1,7 +1,7 @@
 ---
 title: How to use multiple Supabase accounts with the CLI
 description: The Supabase CLI holds one login at a time. Three ways to work with multiple Supabase accounts, with steps for each and a table to pick one.
-lastUpdated: 2026-11-17
+lastUpdated: 2026-11-21
 ---
 
 The Supabase CLI holds **one login at a time**. To work with multiple Supabase accounts you either log in again on every switch, pass a different access token per command with `SUPABASE_ACCESS_TOKEN`, or save the tokens once and switch by name with supawho.
@@ -45,7 +45,7 @@ This is the method [Supabase documents for CI](https://supabase.com/docs/guides/
 
 ## Method 3: save accounts once, switch by name with supawho
 
-[supawho](/guides/introduction/) keeps one token per account in your OS secret vault and runs `supabase login --token` for you:
+[supawho](/guides/introduction/) keeps one token per account in your OS secret vault and runs `supabase login` for you:
 
 ```bash
 supawho add              # once per account: name + token (hidden input)

@@ -1,7 +1,7 @@
 ---
 title: How supawho works with the Supabase CLI
 description: The model behind supawho. It stores Supabase access tokens in the OS secret vault and switches accounts by running supabase login for you.
-lastUpdated: 2026-11-17
+lastUpdated: 2026-11-21
 ---
 
 supawho is a thin layer on top of the official Supabase CLI. Here's the whole model.
@@ -18,10 +18,10 @@ side-project  → sbp_••••••••
 
 ## Switching = driving the Supabase CLI
 
-When you run [`supawho use work`](/commands/use/), supawho reads that account's token from the vault and runs:
+When you run [`supawho use work`](/commands/use/), supawho reads that account's token from the vault and runs `supabase login`, handing it the token through `SUPABASE_ACCESS_TOKEN` in that process's environment. It is the same as running:
 
 ```bash
-supabase login --token <token>
+SUPABASE_ACCESS_TOKEN=<token> supabase login
 ```
 
 supawho doesn't reimplement authentication: it drives the Supabase CLI you already have, which is why the [Supabase CLI](https://supabase.com/docs/guides/cli) must be installed and on your `PATH`. After the switch, every `supabase` command runs as that account until you switch again.
