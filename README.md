@@ -15,7 +15,7 @@
 
 ### Switch between multiple **Supabase** accounts in seconds — on any OS.
 
-Your access tokens live in your operating system's **native secret vault**: supawho never writes them to a file.<br>
+Your access tokens live in your operating system's **native secret vault**: supawho never stores them in plain text.<br>
 One command to jump between projects and clients. 🔍
 
 **[Documentation → supawho.dev](https://supawho.dev)**
@@ -45,7 +45,7 @@ One command to jump between projects and clients. 🔍
 
 | | |
 |---|---|
-| 🔐 **Secure by design** | Tokens live in the OS secret store — encrypted, never written to a file |
+| 🔐 **Secure by design** | Tokens live in the OS secret store (or GPG-encrypted in `pass`) — never in plain text |
 | 🔎 **Know who is who** | `supawho whoami` maps every account to its real email + organizations |
 | 🩺 **Health check** | `supawho doctor` flags revoked tokens and environment issues, with the fix for each |
 | 🖥️ **Truly cross-platform** | One static binary for macOS, Linux and Windows. No runtime to install |
@@ -120,7 +120,7 @@ sudo rpm -i supawho_*_linux_amd64.rpm
 sudo apk add --allow-untrusted supawho_*_linux_amd64.apk
 ```
 
-> ℹ️ Linux needs a Secret Service provider (GNOME Keyring, KWallet, …) running to store tokens.
+> ℹ️ Linux stores tokens in the Secret Service (GNOME Keyring, KWallet, …). On servers, SSH sessions and WSL without one, use [`pass`](https://supawho.dev/guides/headless-linux/) instead.
 
 </details>
 
@@ -276,11 +276,12 @@ It downloads the latest release, **verifies its checksum**, and swaps the binary
 
 ## 🔒 Why is it secure?
 
-supawho **never writes your tokens to a file**. They live in your operating system's native secret store — the same encrypted vault the OS uses for passwords and certificates:
+supawho **never stores your tokens in plain text**. They live in your operating system's native secret store — the same encrypted vault the OS uses for passwords and certificates:
 
 - **macOS** → Keychain
 - **Linux** → Secret Service (GNOME Keyring / KWallet, via `libsecret`)
 - **Windows** → Credential Manager
+- **Headless Linux** (opt-in, `SUPAWHO_BACKEND=pass`) → [`pass`](https://supawho.dev/guides/headless-linux/), one GPG-encrypted entry per account
 
 | | supawho | Plain-text files |
 |---|:---:|:---:|
@@ -301,7 +302,7 @@ The full picture is in the [security model](https://supawho.dev/guides/security/
 ## 📋 Requirements
 
 - **macOS**, **Linux**, or **Windows** — a single static binary, no runtime to install
-  - On Linux, a Secret Service provider must be running (GNOME Keyring, KWallet, …)
+  - On Linux, a Secret Service provider (GNOME Keyring, KWallet, …), or [`pass`](https://supawho.dev/guides/headless-linux/) on machines without a desktop
 - [**Supabase CLI**](https://supabase.com/docs/guides/cli) — installed and available in your `PATH`
 
 <br>
@@ -314,8 +315,8 @@ Run `supawho list` to check the exact name — account names are case-sensitive.
 **The token stops working after switching**
 Confirm it's still valid in [Supabase Dashboard → Access Tokens](https://supabase.com/dashboard/account/tokens), then run `supawho add` again with the same name and a fresh token: it replaces the saved one.
 
-**Linux: `Cannot create an item in a locked collection`**
-Your keyring is locked or no Secret Service is running. Unlock your login keyring (GNOME Keyring / KWallet) and try again.
+**Linux: `your keyring is locked` or `no secret store is available`**
+Unlock your login keyring (GNOME Keyring / KWallet) and try again. On a server, over SSH or in WSL, where no Secret Service runs, store the tokens in [`pass`](https://supawho.dev/guides/headless-linux/) with `export SUPAWHO_BACKEND=pass`.
 
 **`supawho upgrade` says it's managed by a package manager**
 That's on purpose — update through the manager you installed it with (see the table above).

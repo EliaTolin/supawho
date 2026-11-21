@@ -105,6 +105,7 @@ export default defineConfig({
 						{ label: 'How it works', slug: 'guides/how-it-works' },
 						{ label: 'Security', slug: 'guides/security' },
 						{ label: 'CI and automation', slug: 'guides/ci-and-automation' },
+						{ label: 'Headless Linux (pass)', slug: 'guides/headless-linux' },
 						{ label: 'Troubleshooting', slug: 'guides/troubleshooting' },
 						{ label: 'Updating', slug: 'guides/updating' },
 						{ label: 'About', slug: 'about' },

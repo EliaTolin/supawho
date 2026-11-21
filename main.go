@@ -1,10 +1,12 @@
 // Command supawho manages multiple Supabase CLI accounts securely, storing
 // each account's access token in the OS secret store (macOS Keychain, Linux
-// Secret Service, Windows Credential Manager).
+// Secret Service, Windows Credential Manager), or in pass when
+// SUPAWHO_BACKEND=pass.
 package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -19,8 +21,13 @@ import (
 
 func main() {
 	current := resolveVersion()
+	st, err := store.Open(os.Getenv("SUPAWHO_BACKEND"))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "supawho:", err)
+		os.Exit(1)
+	}
 	app := &cli.App{
-		Store:   store.NewKeyring(),
+		Store:   st,
 		Login:   supabase.Login,
 		Upgrade: updater.Run,
 		Profile: func(token string) (string, []string, error) {

@@ -27,6 +27,9 @@ func newHarness(input string) *harness {
 		In:      strings.NewReader(input),
 		Out:     h.out,
 		Version: "9.9.9",
+		// Fixed so OS-dependent messages don't change with the host running
+		// the tests; tests for other systems set it themselves.
+		GOOS: "darwin",
 	}
 	return h
 }
@@ -474,6 +477,7 @@ func TestHelpGolden(t *testing.T) {
 func TestAddKeychainLocked(t *testing.T) {
 	h := newHarness("")
 	h.app.Store = store.NewFailing(store.ErrLocked)
+	h.app.GOOS = "darwin"
 	if code := h.app.Run([]string{"add", "work", "sbp_x"}); code != 1 {
 		t.Fatalf("exit code = %d, want 1", code)
 	}

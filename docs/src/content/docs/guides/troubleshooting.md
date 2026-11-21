@@ -18,9 +18,17 @@ The login keychain is locked, which usually happens over SSH or in a session wit
 security unlock-keychain ~/Library/Keychains/login.keychain-db
 ```
 
-## Linux: `Cannot create an item in a locked collection`
+## Linux: `your keyring is locked`
 
-Your keyring is locked, or no Secret Service provider is running. Unlock the login keyring (GNOME Keyring or KWallet) and try again. On a server without a desktop session, see [headless machines](/guides/ci-and-automation/#headless-machines-and-ssh).
+Unlock the login keyring (GNOME Keyring or KWallet) and try again.
+
+## Linux: `no secret store is available`
+
+No Secret Service is running in this session, which is normal on servers, over SSH, in WSL and in containers. Store the tokens in pass instead: see [Headless Linux](/guides/headless-linux/).
+
+## `SUPAWHO_BACKEND=pass is set, but pass is not installed`
+
+Install pass, create a store with `pass init <your-gpg-key-id>`, and try again. To go back to the OS keyring, `unset SUPAWHO_BACKEND`.
 
 ## `supawho: exec: "supabase": executable file not found in $PATH`
 

@@ -25,6 +25,7 @@ const (
 
 // System check names, as they appear in the JSON output.
 const (
+	checkStore   = "secret_store"
 	checkCLI     = "supabase_cli"
 	checkActive  = "active_account"
 	checkVersion = "supawho_version"
@@ -67,11 +68,12 @@ func (a *App) Doctor(args []string) error {
 		return a.fail(jsonOut, "doctor is not available in this build")
 	}
 
+	// A failing secret store is reported by the secret_store check rather
+	// than aborting: diagnosing it is what doctor is for.
 	names, err := a.Store.List()
 	if err != nil {
-		return a.fail(jsonOut, err.Error())
-	}
-	if target != "" {
+		names = nil
+	} else if target != "" {
 		if !slices.Contains(names, target) {
 			return a.fail(jsonOut, fmt.Sprintf("Account '%s' not found. Run 'supawho list' to see saved accounts.", target))
 		}
@@ -146,7 +148,7 @@ func (a *App) diagnose(names []string, p progress) report {
 	// against all of them, and any error text is scrubbed of all of them.
 	// Each secret is read exactly once, since every read may prompt the user
 	// to unlock the OS store.
-	all, _ := a.Store.List()
+	all, listErr := a.Store.List()
 	var saved []savedToken
 	secrets := []string{}
 	readErrs := map[string]error{}
@@ -203,6 +205,7 @@ func (a *App) diagnose(names []string, p progress) report {
 	}
 
 	steps := []func() check{
+		func() check { return a.checkSecretStore(listErr) },
 		a.checkCLI,
 		func() check {
 			return checkActiveAccount(a.ActiveToken != nil, active, source, activeErr, saved, r.Accounts)
@@ -267,6 +270,45 @@ func (a *App) checkAccount(name, token string, readErr error, secrets []string, 
 		}
 	}
 	return c
+}
+
+// checkSecretStore reports the backend holding the tokens and whether it
+// could be read.
+func (a *App) checkSecretStore(listErr error) check {
+	c := check{Name: checkStore}
+	backend := a.Store.Backend()
+	if listErr == nil {
+		c.Status, c.Detail = statusPass, backend
+		if backend == store.BackendKeyring {
+			c.Detail += " (" + keyringName(a.goos()) + ")"
+		}
+		return c
+	}
+	c.Status = statusFail
+	passHint := "export SUPAWHO_BACKEND=pass · " + headlessGuide
+	switch {
+	case errors.Is(listErr, store.ErrPassNotInstalled):
+		c.Detail, c.Hint = "pass is not installed", "install pass, then run: pass init <your-gpg-key-id>"
+	case errors.Is(listErr, store.ErrNoSecretStore):
+		c.Detail, c.Hint = "no Secret Service available in this session", passHint
+	case errors.Is(listErr, store.ErrLocked) && a.goos() == "darwin":
+		c.Detail, c.Hint = "macOS Keychain is locked", "security unlock-keychain ~/Library/Keychains/login.keychain-db"
+	case errors.Is(listErr, store.ErrLocked):
+		c.Detail, c.Hint = "keyring is locked", "unlock your login keyring, or: "+passHint
+	default:
+		c.Detail = backend + ": " + listErr.Error()
+	}
+	return c
+}
+
+func keyringName(goos string) string {
+	switch goos {
+	case "darwin":
+		return "macOS Keychain"
+	case "windows":
+		return "Windows Credential Manager"
+	}
+	return "Secret Service"
 }
 
 func (a *App) checkCLI() check {

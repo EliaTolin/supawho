@@ -1,7 +1,7 @@
 ---
 title: supawho doctor
 description: Check that every saved Supabase access token is still valid and that the Supabase CLI, the active login and supawho itself are in good shape.
-lastUpdated: 2026-11-18
+lastUpdated: 2026-11-21
 ---
 
 `doctor` tells you at a glance which saved tokens still work, which ones were revoked, and whether your environment is healthy. Every problem comes with the command that fixes it.
@@ -33,12 +33,13 @@ PASS  acme        mario@acme.it  142ms
 FAIL  old-client  token is invalid or revoked
       -> supawho remove old-client && supawho add old-client <new-token>
 System
+PASS  Secret store    keyring (macOS Keychain)
 PASS  Supabase CLI    2.48.3 /opt/homebrew/bin/supabase
 PASS  Active account  acme (keychain)
 WARN  supawho         1.6.2 -> 1.7.0 available
       -> supawho upgrade
 
-3 passed, 1 warning, 1 failed (score 70%)
+4 passed, 1 warning, 1 failed (score 75%)
 ```
 
 ## Behavior
@@ -46,6 +47,7 @@ WARN  supawho         1.6.2 -> 1.7.0 available
 | Check | PASS | WARN | FAIL |
 |---|---|---|---|
 | Each account's token (`GET /v1/profile`) | Valid, shows the email and latency | Network error, timeout or 5xx (could not verify), or the OS secret store could not be read | Token rejected (401), or missing from the OS secret store |
+| Secret store | The accounts could be read, shows the backend (`keyring` or `pass`) | — | No Secret Service, keyring locked, or pass not installed: shows the fix |
 | Supabase CLI | Found in `PATH`, shows version and path | — | Not installed |
 | Active account | The token the Supabase CLI is using matches a saved account | Not logged in, or logged in with a token that isn't saved in supawho | The active token belongs to an account whose token failed |
 | supawho version | Up to date | Update available, check failed, or development build | — |
@@ -70,12 +72,13 @@ supawho doctor --json
       "hint": "supawho remove old-client && supawho add old-client <new-token>" }
   ],
   "system": [
+    { "name": "secret_store", "status": "pass", "detail": "keyring (macOS Keychain)" },
     { "name": "supabase_cli", "status": "pass", "detail": "2.48.3 /opt/homebrew/bin/supabase" },
     { "name": "active_account", "status": "pass", "detail": "acme (keychain)" },
     { "name": "supawho_version", "status": "warn", "detail": "1.6.2 -> 1.7.0 available",
       "hint": "supawho upgrade" }
   ],
-  "summary": { "pass": 3, "warn": 1, "fail": 1, "score": 70 }
+  "summary": { "pass": 4, "warn": 1, "fail": 1, "score": 75 }
 }
 ```
 
