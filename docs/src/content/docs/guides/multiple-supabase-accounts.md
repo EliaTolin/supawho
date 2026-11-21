@@ -1,7 +1,7 @@
 ---
 title: How to use multiple Supabase accounts with the CLI
 description: The Supabase CLI holds one login at a time. Three ways to work with multiple Supabase accounts, with steps for each and a table to pick one.
-lastUpdated: 2026-11-17
+lastUpdated: 2026-11-21
 ---
 
 The Supabase CLI holds **one login at a time**. To work with multiple Supabase accounts you either log in again on every switch, pass a different access token per command with `SUPABASE_ACCESS_TOKEN`, or save the tokens once and switch by name with supawho.
@@ -54,6 +54,8 @@ supawho whoami           # which saved account is which email?
 ```
 
 After `supawho use`, the Supabase CLI is logged in as that account until you switch again. [Install supawho](/guides/getting-started/) to try it.
+
+To keep one account per project folder instead, `supawho env` combines Method 2 with the vault: direnv sets `SUPABASE_ACCESS_TOKEN` from the saved account when you enter the folder, with no token in any file. See [Per-project accounts with direnv](/guides/per-project-accounts/).
 
 **Fits:** three or more accounts, or switching several times a day.
 

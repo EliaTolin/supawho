@@ -46,6 +46,9 @@ type App struct {
 	Lookup  LookupFunc
 	In      io.Reader
 	Out     io.Writer
+	// Err receives messages that must stay off Out, such as the errors of
+	// `env`, whose stdout is evaluated by a shell.
+	Err     io.Writer
 	Version string
 
 	// Doctor probes. ActiveToken reports the token the supabase CLI uses and
@@ -62,6 +65,9 @@ type App struct {
 
 	// now times the token checks; defaults to time.Now.
 	now func() time.Time
+	// getwd and isTerminal default to os.Getwd and a real terminal check.
+	getwd      func() (string, error)
+	isTerminal func(io.Writer) bool
 }
 
 // errHandled signals a user-facing failure whose message was already printed;
@@ -93,6 +99,8 @@ func (a *App) Run(args []string) int {
 		err = a.Whoami(arg(args, 1))
 	case "find", "locate":
 		err = a.Find(arg(args, 1))
+	case "env":
+		err = a.Env(args[1:])
 	case "projects":
 		err = a.Projects(args[1:])
 	case "doctor", "check":

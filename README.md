@@ -177,6 +177,7 @@ For scripts there is a one-line form, `supawho add <name> "$SUPABASE_TOKEN"`. Av
 | `supawho add` | Save a new account (guided, hidden token input) |
 | `supawho add <name> <token>` | Save a new account in one line, for scripts |
 | `supawho use <name>` | Switch to an account |
+| `supawho env [name]` | Print `SUPABASE_ACCESS_TOKEN` for one shell or folder (eval, direnv) |
 | `supawho list` | Show all saved accounts |
 | `supawho whoami [name]` | Reveal the email + organizations behind each account |
 | `supawho find <project-ref>` | Find which account owns a project |
@@ -251,6 +252,18 @@ $ supawho projects client-a
   api        abcdefghijklmnopqrst  Client A      eu-central-1  ACTIVE_HEALTHY
   api-dev    tsrqponmlkjihgfedcba  Client A      eu-central-1  INACTIVE
 ```
+
+### One account per project folder
+
+`supawho use` switches the login for the whole machine. To pin an account to a folder instead, so two terminals can work on two clients at once, let [direnv](https://direnv.net/) set `SUPABASE_ACCESS_TOKEN` from the saved account:
+
+```bash
+echo client-a > .supawho                                 # only the name, safe to commit
+printf 'watch_file .supawho\neval "$(supawho env)"\n' > .envrc
+direnv allow
+```
+
+The token is read from the secret store each time and never written to a file. Details and trade-offs: [Per-project accounts with direnv](https://supawho.dev/guides/per-project-accounts/).
 
 <br>
 

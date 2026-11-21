@@ -191,7 +191,49 @@ func (a *App) Whoami(name string) error {
 		rows = append(rows, []string{n, email, strings.Join(orgs, ", ")})
 	}
 	a.UI.Table([]string{"ACCOUNT", "EMAIL", "ORGANIZATION"}, rows)
+	a.whoamiContext()
 	return nil
+}
+
+// whoamiContext reports which saved account the Supabase CLI is using and
+// where its token comes from, and the account a .supawho file assigns to
+// the current folder.
+func (a *App) whoamiContext() {
+	var lines []string
+	if a.ActiveToken != nil {
+		if tok, src, err := a.ActiveToken(); err == nil {
+			who := "a token not saved in supawho"
+			if names, err := a.Store.List(); err == nil {
+				for _, n := range names {
+					if saved, err := a.Store.Get(n); err == nil && saved == tok {
+						who = n
+						break
+					}
+				}
+			}
+			lines = append(lines, fmt.Sprintf("Active: %s (from %s)", who, sourceLabel(src)))
+		}
+	}
+	if name, path, err := a.folderAccount(); err == nil && name != "" {
+		lines = append(lines, fmt.Sprintf("This folder: %s (%s)", printable(name), path))
+	}
+	if len(lines) == 0 {
+		return
+	}
+	a.UI.Line()
+	for _, l := range lines {
+		a.UI.Hint("%s", l)
+	}
+}
+
+func sourceLabel(src string) string {
+	switch src {
+	case "env":
+		return "SUPABASE_ACCESS_TOKEN"
+	case "keychain", "file":
+		return "the Supabase CLI login"
+	}
+	return src
 }
 
 // Find is the reverse lookup: given a Supabase project ref, it reports which

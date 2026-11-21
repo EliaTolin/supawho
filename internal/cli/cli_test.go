@@ -455,6 +455,7 @@ const wantHelp = "\n" +
 	"  supawho list                   List saved accounts\n" +
 	"  supawho use <name>             Login with specific account\n" +
 	"  supawho whoami [name]          Show the email behind each account\n" +
+	"  supawho env [name]             Print SUPABASE_ACCESS_TOKEN for eval / direnv\n" +
 	"  supawho find <project-ref>     Find which account owns a project\n" +
 	"  supawho projects [name]        List the projects of each account\n" +
 	"  supawho doctor [name]          Check token validity and system health\n" +
