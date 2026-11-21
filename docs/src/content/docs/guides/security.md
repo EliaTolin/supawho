@@ -1,7 +1,7 @@
 ---
 title: 'Security: how supawho stores Supabase access tokens'
 description: Where supawho keeps your Supabase access tokens, what the OS secret vault protects, what happens when you switch accounts, and what is written to disk.
-lastUpdated: 2026-11-17
+lastUpdated: 2026-11-21
 ---
 
 supawho **never writes an access token to a file**. Each token is stored in your operating system's native secret store, the same encrypted vault the OS uses for passwords and certificates:
@@ -28,6 +28,10 @@ The vault protects tokens at rest and from other user accounts on the machine. I
 
 - **The token is passed as a command-line argument.** For the fraction of a second that `supabase login` runs, the token is visible in the process list to other processes running as your user (and to administrators). On a shared machine, treat that as exposure.
 - **The Supabase CLI keeps its own copy of the active token.** According to the [Supabase CLI reference](https://supabase.com/docs/reference/cli/supabase-login), the token is stored in native credentials storage, and "if native credentials storage is unavailable, it will be written to a plain text file at `~/.supabase/access-token`". That file, when it exists, is written by the Supabase CLI, not by supawho.
+
+## Per-shell accounts with `supawho env`
+
+[`supawho env`](/commands/env/) prints `export SUPABASE_ACCESS_TOKEN=…` for your shell to evaluate, usually from direnv. The token is read from the vault each time and never written to a file, but while it is set it is in the shell's environment and inherited by every program started from that shell, not only the Supabase CLI. `env` refuses to print to a terminal, so the token doesn't land in your scrollback, and it prints every error to stderr, so a failed `eval` runs nothing. A `.supawho` file holds only an account name and is safe to commit. See [Per-project accounts](/guides/per-project-accounts/#security-trade-offs).
 
 ## Add tokens without leaving them in your shell history
 

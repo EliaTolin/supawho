@@ -1,7 +1,7 @@
 ---
 title: supawho commands
-description: Every supawho command at a glance, with aliases. add, use, list, whoami, find, projects, doctor, rename, remove, upgrade and version, each linked to its page.
-lastUpdated: 2026-11-18
+description: Every supawho command at a glance, with aliases. add, use, env, list, whoami, find, projects, doctor, rename, remove, upgrade and version, each linked to its page.
+lastUpdated: 2026-11-21
 ---
 
 supawho has a small, focused command set. Each one has its own reference page with syntax, examples and exit codes.
@@ -12,6 +12,7 @@ supawho has a small, focused command set. Each one has its own reference page wi
 | [`supawho add`](/commands/add/) | Save a new account (asks for name and token) |
 | [`supawho add <name> <token>`](/commands/add/) | Save a new account in one line, for scripts |
 | [`supawho use <name>`](/commands/use/) | Switch to an account |
+| [`supawho env [name]`](/commands/env/) | Print `SUPABASE_ACCESS_TOKEN` for one shell or folder (eval, direnv) |
 | [`supawho list`](/commands/list/) | List saved accounts |
 | [`supawho whoami [name]`](/commands/whoami/) | Reveal the email + organizations behind each account |
 | [`supawho find <project-ref>`](/commands/find/) | Find which account owns a project |

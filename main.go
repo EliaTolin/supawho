@@ -49,6 +49,7 @@ func main() {
 		},
 		In:      os.Stdin,
 		Out:     os.Stdout,
+		Err:     os.Stderr,
 		Version: current,
 	}
 
@@ -63,7 +64,7 @@ func main() {
 	// itself), and when output is not a terminal
 	// (pipes, scripts), so it never pollutes machine-readable output.
 	switch cmd {
-	case "upgrade", "update", "version", "--version", "-v", "help", "--help", "-h", "doctor", "check":
+	case "env", "upgrade", "update", "version", "--version", "-v", "help", "--help", "-h", "doctor", "check":
 	default:
 		if term.IsTerminal(int(os.Stdout.Fd())) {
 			updater.MaybeNotify(current, os.Stderr)

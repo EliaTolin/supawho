@@ -62,8 +62,12 @@ func (s *Store) saveList(names []string) error {
 	return s.b.set(indexKey, strings.Join(names, ","))
 }
 
-// Get returns the token for name, or ErrNotFound.
+// Get returns the token for name, or ErrNotFound. The internal index key is
+// never returned as an account, even if a name read from a file asks for it.
 func (s *Store) Get(name string) (string, error) {
+	if name == indexKey {
+		return "", ErrNotFound
+	}
 	return s.b.get(name)
 }
 
