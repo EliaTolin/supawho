@@ -186,3 +186,11 @@ func TestWhoamiActiveTokenNotSaved(t *testing.T) {
 		t.Fatalf("no .supawho here, but output mentions it:\n%s", h.out)
 	}
 }
+
+func TestEnvRefusesReservedKeyFromSupawhoFile(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, filepath.Join(root, ".supawho"), "_account_list\n")
+	h, errOut := envHarness(t, root)
+	_ = h.st.Add("client-a", "sbp_aaa")
+	failsQuietly(t, h, errOut, []string{"env"}, "not found")
+}

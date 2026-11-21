@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/EliaTolin/supawho/internal/store"
@@ -54,7 +55,18 @@ func (a *App) Env(args []string) error {
 		}
 	}
 
-	token, err := a.Store.Get(name)
+	// Only saved accounts are used: the name may come from a .supawho file
+	// in a folder someone else wrote.
+	names, err := a.Store.List()
+	if err != nil {
+		return a.envFail("%v", err)
+	}
+	token := ""
+	if slices.Contains(names, name) {
+		token, err = a.Store.Get(name)
+	} else {
+		err = store.ErrNotFound
+	}
 	if errors.Is(err, store.ErrNotFound) {
 		if from != "" {
 			return a.envFail("Account '%s' (from %s) not found. Run 'supawho list' to see saved accounts.", printable(name), from)

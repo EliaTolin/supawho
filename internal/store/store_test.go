@@ -162,3 +162,13 @@ func TestRemoveLastEmptiesList(t *testing.T) {
 		t.Fatalf("list = %v, want nil", got)
 	}
 }
+
+func TestGetRejectsTheIndexKey(t *testing.T) {
+	s := NewMemory()
+	if err := s.Add("client-a", "sbp_aaa"); err != nil {
+		t.Fatal(err)
+	}
+	if tok, err := s.Get(indexKey); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("Get(%q) = %q, %v; want ErrNotFound", indexKey, tok, err)
+	}
+}
