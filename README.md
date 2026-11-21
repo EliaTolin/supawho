@@ -290,7 +290,7 @@ supawho **never writes your tokens to a file**. They live in your operating syst
 
 What this does not cover, so you can judge for yourself:
 
-- To switch account, supawho runs `supabase login --token <token>`. For that brief moment the token is visible in the process list to other processes running as your user.
+- To switch account, supawho runs `supabase login` with the token in that process's `SUPABASE_ACCESS_TOKEN`, never as a command-line argument, so other users can't see it in the process list.
 - After the switch, the Supabase CLI keeps the active token in its own storage: the OS keyring when available, otherwise a plain-text file under `~/.supabase`.
 - The only file supawho writes is a timestamp for the daily update check. It contains no token.
 

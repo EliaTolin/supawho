@@ -1,10 +1,10 @@
 ---
 title: supawho vs. supabase login vs. SUPABASE_ACCESS_TOKEN
 description: An honest comparison of the ways to switch Supabase accounts in the CLI. What each one costs, where the token ends up, and when supawho is not the right tool.
-lastUpdated: 2026-11-17
+lastUpdated: 2026-11-21
 ---
 
-There are three ways to switch Supabase accounts in the CLI: run `supabase login` again, set `SUPABASE_ACCESS_TOKEN`, or use supawho. supawho is the only one that remembers several accounts for you, and it is built on the first: under the hood it runs `supabase login --token`.
+There are three ways to switch Supabase accounts in the CLI: run `supabase login` again, set `SUPABASE_ACCESS_TOKEN`, or use supawho. supawho is the only one that remembers several accounts for you, and it is built on the first: under the hood it runs `supabase login` with the saved token.
 
 For step-by-step instructions on each method, see [How to use multiple Supabase accounts with the CLI](/guides/multiple-supabase-accounts/).
 
@@ -35,7 +35,7 @@ For everyday switching it has two drawbacks. The token has to be stored somewher
 
 ## supawho
 
-supawho stores one token per account in the OS secret vault and switches by running `supabase login --token` with the one you pick. On top of that it adds [`whoami`](/commands/whoami/), which maps saved accounts to emails and organizations, and [`find`](/commands/find/), which tells you which account owns a project ref.
+supawho stores one token per account in the OS secret vault and switches by running `supabase login` with the one you pick. On top of that it adds [`whoami`](/commands/whoami/), which maps saved accounts to emails and organizations, and [`find`](/commands/find/), which tells you which account owns a project ref.
 
 What it doesn't change: the token is still handed to the Supabase CLI, which stores the active one exactly as `supabase login` does. The [Security](/guides/security/) page describes the whole path.
 

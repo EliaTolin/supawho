@@ -16,7 +16,7 @@ import (
 	"github.com/EliaTolin/supawho/internal/updater"
 )
 
-// LoginFunc performs the actual `supabase login --token` call.
+// LoginFunc performs the actual `supabase login` call.
 type LoginFunc func(token string) error
 
 // UpgradeFunc self-updates the running binary to the latest release.

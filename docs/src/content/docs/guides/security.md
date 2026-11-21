@@ -1,7 +1,7 @@
 ---
 title: 'Security: how supawho stores Supabase access tokens'
 description: Where supawho keeps your Supabase access tokens, what the OS secret vault protects, what happens when you switch accounts, and what is written to disk.
-lastUpdated: 2026-11-17
+lastUpdated: 2026-11-21
 ---
 
 supawho **never writes an access token to a file**. Each token is stored in your operating system's native secret store, the same encrypted vault the OS uses for passwords and certificates:
@@ -24,9 +24,9 @@ The vault protects tokens at rest and from other user accounts on the machine. I
 
 ## What happens when you switch accounts
 
-[`supawho use <name>`](/commands/use/) reads the token from the vault and runs `supabase login --token <token>`. Two consequences are worth knowing:
+[`supawho use <name>`](/commands/use/) reads the token from the vault and runs `supabase login`. Two things are worth knowing:
 
-- **The token is passed as a command-line argument.** For the fraction of a second that `supabase login` runs, the token is visible in the process list to other processes running as your user (and to administrators). On a shared machine, treat that as exposure.
+- **The token is passed in the environment, not as an argument.** supawho sets `SUPABASE_ACCESS_TOKEN` only for the `supabase login` process. Command-line arguments are visible to every user on the machine (`ps`, `/proc/<pid>/cmdline`); a process's environment is readable only by your own user and administrators.
 - **The Supabase CLI keeps its own copy of the active token.** According to the [Supabase CLI reference](https://supabase.com/docs/reference/cli/supabase-login), the token is stored in native credentials storage, and "if native credentials storage is unavailable, it will be written to a plain text file at `~/.supabase/access-token`". That file, when it exists, is written by the Supabase CLI, not by supawho.
 
 ## Add tokens without leaving them in your shell history

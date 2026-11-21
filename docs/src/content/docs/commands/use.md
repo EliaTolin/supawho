@@ -1,10 +1,10 @@
 ---
 title: supawho use
-lastUpdated: 2026-11-17
+lastUpdated: 2026-11-21
 description: Switch to a saved Supabase account by name. supawho logs you in by driving the Supabase CLI with the stored token.
 ---
 
-Switch to a saved account. supawho reads the account's token from the OS secret vault and logs you in by running `supabase login --token`.
+Switch to a saved account. supawho reads the account's token from the OS secret vault and logs you in by running `supabase login`, with the token in its environment rather than on the command line.
 
 ## Synopsis
 
