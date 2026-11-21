@@ -39,7 +39,7 @@ func (a *App) renderFancy(names []string) report {
 		rows[i] = accounts.Add("  " + u.Bold(n))
 	}
 
-	labels := []string{checkCLI, checkActive, checkVersion}
+	labels := []string{checkStore, checkCLI, checkActive, checkVersion}
 	var sysRows []*ui.Row
 	system := u.NewLiveList()
 	defer system.Stop()

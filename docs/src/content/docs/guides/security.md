@@ -1,16 +1,18 @@
 ---
 title: 'Security: how supawho stores Supabase access tokens'
 description: Where supawho keeps your Supabase access tokens, what the OS secret vault protects, what happens when you switch accounts, and what is written to disk.
-lastUpdated: 2026-11-17
+lastUpdated: 2026-11-21
 ---
 
-supawho **never writes an access token to a file**. Each token is stored in your operating system's native secret store, the same encrypted vault the OS uses for passwords and certificates:
+supawho **never stores an access token in plain text**. By default, each token is stored in your operating system's native secret store, the same encrypted vault the OS uses for passwords and certificates:
 
 - **macOS**: Keychain
 - **Linux**: Secret Service (GNOME Keyring / KWallet, via `libsecret`)
 - **Windows**: Credential Manager
 
-All entries live under the service name `supabase-cli-accounts`, so you can inspect or delete them with your OS tools (Keychain Access, Seahorse, Credential Manager).
+On machines without a desktop session (servers, SSH, WSL), you can opt in to [pass](/guides/headless-linux/) with `SUPAWHO_BACKEND=pass`: each token becomes a GPG-encrypted entry under `supawho/` in your password store. Tokens are passed to `pass` on standard input, never as arguments. supawho never falls back from one backend to another on its own.
+
+With the OS vault, all entries live under the service name `supabase-cli-accounts`, so you can inspect or delete them with your OS tools (Keychain Access, Seahorse, Credential Manager).
 
 ## What the vault protects
 
@@ -61,5 +63,5 @@ supawho sends no telemetry.
 ## Requirements
 
 - macOS, Linux, or Windows: a single static binary, no runtime to install
-- On Linux, a Secret Service provider must be running (GNOME Keyring, KWallet, …)
+- On Linux, a Secret Service provider (GNOME Keyring, KWallet, …), or [pass](/guides/headless-linux/) on machines without one
 - The [Supabase CLI](https://supabase.com/docs/guides/cli), available in your `PATH`

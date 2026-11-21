@@ -1,0 +1,29 @@
+#!/bin/sh
+# Fake `pass` for tests. Stores entries as plain files under $FAKE_PASS_DIR,
+# mimics pass's messages and exit codes, and appends every argv to
+# $FAKE_PASS_DIR/.argv so tests can check no secret is passed as an argument.
+set -u
+dir="$FAKE_PASS_DIR"
+echo "$*" >> "$dir/.argv"
+[ -n "${FAKE_PASS_FAIL:-}" ] && { echo "$FAKE_PASS_FAIL" >&2; exit 2; }
+cmd="$1"; shift
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --multiline|-m|--force|-f) shift ;;
+    *) name="$1"; shift ;;
+  esac
+done
+case "$cmd" in
+  show)
+    [ -f "$dir/$name" ] || { echo "Error: $name is not in the password store." >&2; exit 1; }
+    cat "$dir/$name" ;;
+  insert)
+    [ -f "$dir/.gpg-id" ] || { echo "Error: You must run: pass init your-gpg-id before you may use the password store." >&2; exit 1; }
+    echo "Enter contents of $name and press Ctrl+D when finished:"
+    mkdir -p "$(dirname "$dir/$name")"
+    cat > "$dir/$name" ;;
+  rm)
+    [ -f "$dir/$name" ] || { echo "Error: $name is not in the password store." >&2; exit 1; }
+    rm -f "$dir/$name" ;;
+  *) echo "unknown command $cmd" >&2; exit 1 ;;
+esac

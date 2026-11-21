@@ -28,7 +28,7 @@ supawho add                    # asks for a name and the token (hidden input)
 supawho use client-a           # switch in a second
 ```
 
-supawho stores each token in your operating system's **native secret vault** (macOS Keychain, Linux Secret Service, or Windows Credential Manager) and never writes it to a file. [Security](/guides/security/) explains exactly what is stored where.
+supawho stores each token in your operating system's **native secret vault** (macOS Keychain, Linux Secret Service, or Windows Credential Manager) and never stores it in plain text. On servers without a desktop, it can use [pass](/guides/headless-linux/) instead. [Security](/guides/security/) explains exactly what is stored where.
 
 ## Beyond switching
 

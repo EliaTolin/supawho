@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"runtime"
 	"strings"
 	"time"
 
@@ -47,6 +48,9 @@ type App struct {
 	In      io.Reader
 	Out     io.Writer
 	Version string
+	// GOOS picks platform-specific advice for secret-store errors; empty
+	// means runtime.GOOS.
+	GOOS string
 
 	// Doctor probes. ActiveToken reports the token the supabase CLI uses and
 	// where it came from; CLIInfo locates the CLI; Latest returns the newest
@@ -114,8 +118,14 @@ func (a *App) Run(args []string) int {
 	if err != nil {
 		switch {
 		case errors.Is(err, errHandled):
-		case errors.Is(err, store.ErrLocked):
+		case errors.Is(err, store.ErrPassNotInstalled):
+			a.passNotInstalled()
+		case errors.Is(err, store.ErrNoSecretStore):
+			a.noSecretStore()
+		case errors.Is(err, store.ErrLocked) && a.goos() == "darwin":
 			a.keychainLocked()
+		case errors.Is(err, store.ErrLocked):
+			a.keyringLocked()
 		default:
 			a.UI.Err("%v", err)
 		}
@@ -133,6 +143,50 @@ func (a *App) keychainLocked() {
 	fmt.Fprintln(a.Out, "  security unlock-keychain ~/Library/Keychains/login.keychain-db")
 	fmt.Fprintln(a.Out)
 	fmt.Fprintln(a.Out, "This usually happens over SSH or in a session without a graphical login.")
+}
+
+// headlessGuide documents the pass backend for machines without a keyring.
+const headlessGuide = "https://supawho.dev/guides/headless-linux/"
+
+func (a *App) goos() string {
+	if a.GOOS != "" {
+		return a.GOOS
+	}
+	return runtime.GOOS
+}
+
+// noSecretStore explains a Linux session with no Secret Service at all.
+func (a *App) noSecretStore() {
+	fmt.Fprintln(a.Out, "supawho: no secret store is available, so your accounts can't be read or saved.")
+	fmt.Fprintln(a.Out)
+	fmt.Fprintln(a.Out, "On Linux supawho uses the Secret Service (GNOME Keyring, KWallet), and none")
+	fmt.Fprintln(a.Out, "is running in this session. This is normal on servers, over SSH and in WSL.")
+	fmt.Fprintln(a.Out)
+	fmt.Fprintln(a.Out, "Use pass instead, which needs no desktop session:")
+	fmt.Fprintln(a.Out, "  export SUPAWHO_BACKEND=pass")
+	fmt.Fprintln(a.Out)
+	fmt.Fprintln(a.Out, "Setup: "+headlessGuide)
+}
+
+// keyringLocked explains a locked Secret Service collection (Linux).
+func (a *App) keyringLocked() {
+	fmt.Fprintln(a.Out, "supawho: your keyring is locked, so your accounts can't be read or saved.")
+	fmt.Fprintln(a.Out)
+	fmt.Fprintln(a.Out, "Unlock your login keyring (GNOME Keyring / KWallet) and run the command again.")
+	fmt.Fprintln(a.Out, "On a machine without a desktop session, use pass instead:")
+	fmt.Fprintln(a.Out, "  export SUPAWHO_BACKEND=pass")
+	fmt.Fprintln(a.Out)
+	fmt.Fprintln(a.Out, "Setup: "+headlessGuide)
+}
+
+// passNotInstalled explains SUPAWHO_BACKEND=pass without pass on PATH.
+func (a *App) passNotInstalled() {
+	fmt.Fprintln(a.Out, "supawho: SUPAWHO_BACKEND=pass is set, but pass is not installed.")
+	fmt.Fprintln(a.Out)
+	fmt.Fprintln(a.Out, "Install pass (e.g. 'sudo apt install pass'), then create a store with:")
+	fmt.Fprintln(a.Out, "  pass init <your-gpg-key-id>")
+	fmt.Fprintln(a.Out)
+	fmt.Fprintln(a.Out, "Setup: "+headlessGuide)
 }
 
 // runUpgrade self-updates the binary, or explains how to upgrade when the

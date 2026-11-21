@@ -14,7 +14,7 @@ For step-by-step instructions on each method, see [How to use multiple Supabase 
 |---|---|---|---|
 | Made by | Supabase | Supabase | Community, open source (MIT) |
 | Accounts remembered | One | None, you supply the token | As many as you save |
-| Where your tokens are kept | The active one in the CLI's storage; the others wherever you put them | Shell profile, env file, or CI secret store | OS secret vault (Keychain, Secret Service, Credential Manager) |
+| Where your tokens are kept | The active one in the CLI's storage; the others wherever you put them | Shell profile, env file, or CI secret store | OS secret vault (Keychain, Secret Service, Credential Manager), or GPG-encrypted with pass |
 | Switching | `supabase logout`, `supabase login`, paste | Change the variable | `supawho use <name>` |
 | Affects | Every terminal | One command or one shell | Every terminal |
 | CI and containers | Possible | Yes | No |

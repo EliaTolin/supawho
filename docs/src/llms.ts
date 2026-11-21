@@ -7,7 +7,7 @@ export const SITE = 'https://supawho.dev';
 export const REPO = 'https://github.com/EliaTolin/supawho';
 
 export const SUMMARY =
-	'supawho is a free, open-source CLI (MIT, written in Go) that saves multiple Supabase accounts and switches the Supabase CLI between them with one command, on macOS, Linux and Windows. Access tokens are stored in the operating system secret vault (Keychain, Secret Service, Credential Manager). supawho is a community project, not affiliated with Supabase.';
+	'supawho is a free, open-source CLI (MIT, written in Go) that saves multiple Supabase accounts and switches the Supabase CLI between them with one command, on macOS, Linux and Windows. Access tokens are stored in the operating system secret vault (Keychain, Secret Service, Credential Manager), or GPG-encrypted with pass on headless Linux. supawho is a community project, not affiliated with Supabase.';
 
 // Same order as the sidebar.
 const SECTIONS: { title: string; ids: string[] }[] = [
@@ -21,6 +21,7 @@ const SECTIONS: { title: string; ids: string[] }[] = [
 			'guides/how-it-works',
 			'guides/security',
 			'guides/ci-and-automation',
+			'guides/headless-linux',
 			'guides/troubleshooting',
 			'guides/updating',
 		],

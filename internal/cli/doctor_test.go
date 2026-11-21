@@ -293,7 +293,7 @@ func TestDoctorJSON(t *testing.T) {
 	for _, s := range got.System {
 		names = append(names, s.Name)
 	}
-	if fmt.Sprint(names) != "[supabase_cli active_account supawho_version]" {
+	if fmt.Sprint(names) != "[secret_store supabase_cli active_account supawho_version]" {
 		t.Fatalf("system names = %v", names)
 	}
 	if len(got.Accounts) != 2 || got.Accounts[1]["status"] != "fail" || got.Summary.Fail != 1 {

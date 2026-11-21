@@ -37,7 +37,7 @@ curl -fsSL https://raw.githubusercontent.com/EliaTolin/supawho/main/install.sh |
 Or grab a native package (`.deb` / `.rpm` / `.apk`) from the [releases page](https://github.com/EliaTolin/supawho/releases) and install it with your package manager.
 
 :::note
-On Linux a Secret Service provider (GNOME Keyring, KWallet, …) must be running to store tokens.
+On Linux, supawho stores tokens in the Secret Service (GNOME Keyring, KWallet, …). On servers, SSH sessions and WSL without one, use [pass](/guides/headless-linux/).
 :::
 
 ### Windows

@@ -7,6 +7,7 @@ package store
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -28,11 +29,17 @@ var ErrExists = errors.New("already exists")
 // cannot prompt the user to unlock it.
 var ErrLocked = errors.New("secret store is locked")
 
+// ErrNoSecretStore is returned when no OS secret store is reachable at all,
+// typically on Linux without a D-Bus session or a Secret Service provider
+// (headless servers, SSH sessions, WSL, containers).
+var ErrNoSecretStore = errors.New("no secret store available")
+
 // backend is the low-level secret key/value store (service is fixed per backend).
 type backend interface {
 	get(key string) (string, error) // returns ErrNotFound if the key is missing
 	set(key, value string) error
 	delete(key string) error // no error if the key is missing
+	name() string            // backend name shown by doctor
 }
 
 // Store is the high-level account store shared by every backend.
@@ -41,6 +48,28 @@ type Store struct {
 }
 
 func newStore(b backend) *Store { return &Store{b: b} }
+
+// Backend names, as selected by SUPAWHO_BACKEND and shown by doctor.
+const (
+	BackendKeyring = "keyring"
+	BackendPass    = "pass"
+)
+
+// Open returns the Store for the backend named by value (the content of
+// SUPAWHO_BACKEND): empty or "keyring" for the OS secret store, "pass" for
+// pass. There is deliberately no automatic fallback between backends.
+func Open(value string) (*Store, error) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "", BackendKeyring:
+		return NewKeyring(), nil
+	case BackendPass:
+		return NewPass(), nil
+	}
+	return nil, fmt.Errorf("unknown SUPAWHO_BACKEND %q (use %q or %q)", value, BackendKeyring, BackendPass)
+}
+
+// Backend returns the name of the backend holding the secrets.
+func (s *Store) Backend() string { return s.b.name() }
 
 // List returns the saved account names in insertion order (nil if none).
 func (s *Store) List() ([]string, error) {

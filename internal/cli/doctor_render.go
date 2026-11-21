@@ -10,6 +10,7 @@ import (
 
 // systemLabels are the human labels for the system checks.
 var systemLabels = map[string]string{
+	checkStore:   "Secret store",
 	checkCLI:     "Supabase CLI",
 	checkActive:  "Active account",
 	checkVersion: "supawho",

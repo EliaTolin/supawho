@@ -12,6 +12,8 @@ func NewMemory() *Store {
 	return newStore(&memBackend{m: make(map[string]string)})
 }
 
+func (b *memBackend) name() string { return "memory" }
+
 func (b *memBackend) get(key string) (string, error) {
 	if err, ok := b.errs[key]; ok {
 		return "", err
@@ -41,6 +43,7 @@ func NewFailing(err error) *Store {
 	return newStore(&failBackend{err: err})
 }
 
+func (b *failBackend) name() string               { return "memory" }
 func (b *failBackend) get(string) (string, error) { return "", b.err }
 func (b *failBackend) set(string, string) error   { return b.err }
 func (b *failBackend) delete(string) error        { return b.err }

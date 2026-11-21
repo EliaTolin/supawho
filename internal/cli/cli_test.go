@@ -474,6 +474,7 @@ func TestHelpGolden(t *testing.T) {
 func TestAddKeychainLocked(t *testing.T) {
 	h := newHarness("")
 	h.app.Store = store.NewFailing(store.ErrLocked)
+	h.app.GOOS = "darwin"
 	if code := h.app.Run([]string{"add", "work", "sbp_x"}); code != 1 {
 		t.Fatalf("exit code = %d, want 1", code)
 	}

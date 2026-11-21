@@ -62,10 +62,10 @@ export SUPAWHO_NO_UPDATE_CHECK=1
 
 ## Headless machines and SSH
 
-supawho needs an unlocked secret vault:
+supawho needs an unlocked secret store:
 
 - **macOS over SSH**: the login keychain is locked in sessions without a graphical login. Unlock it with `security unlock-keychain ~/Library/Keychains/login.keychain-db`.
-- **Linux servers**: a Secret Service provider must be running and unlocked, which is rarely the case without a desktop session. On such machines `SUPABASE_ACCESS_TOKEN` is the simpler choice.
+- **Linux servers, SSH and WSL**: there is usually no Secret Service without a desktop session. Store the tokens in pass instead, with `export SUPAWHO_BACKEND=pass`: see [Headless Linux](/guides/headless-linux/). For unattended jobs, `SUPABASE_ACCESS_TOKEN` is still the simpler choice.
 
 See [Troubleshooting](/guides/troubleshooting/) for the exact error messages.
 

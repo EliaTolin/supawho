@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os/exec"
 	"runtime"
+	"strings"
 
+	dbus "github.com/godbus/dbus/v5"
 	"github.com/zalando/go-keyring"
 )
 
@@ -19,6 +21,8 @@ type keyringBackend struct {
 func NewKeyring() *Store {
 	return newStore(&keyringBackend{service: Service})
 }
+
+func (k *keyringBackend) name() string { return BackendKeyring }
 
 func (k *keyringBackend) get(key string) (string, error) {
 	v, err := keyring.Get(k.service, key)
@@ -53,5 +57,49 @@ func translate(goos string, err error) error {
 	if goos == "darwin" && errors.As(err, &exit) && exit.ExitCode() == securityInteractionNotAllowed {
 		return fmt.Errorf("%w (%v)", ErrLocked, err)
 	}
+	if goos == "linux" && err != nil {
+		if sentinel := linuxSentinel(err); sentinel != nil {
+			return fmt.Errorf("%w (%v)", sentinel, err)
+		}
+	}
 	return err
+}
+
+// linuxSentinel recognises the Secret Service failures (via godbus and
+// go-keyring) that mean the store is missing or locked, or returns nil.
+func linuxSentinel(err error) error {
+	switch dbusErrorName(err) {
+	case "org.freedesktop.DBus.Error.ServiceUnknown",
+		"org.freedesktop.DBus.Error.NameHasNoOwner",
+		"org.freedesktop.DBus.Error.Spawn.ServiceNotFound":
+		return ErrNoSecretStore
+	case "org.freedesktop.Secret.Error.IsLocked":
+		return ErrLocked
+	}
+	var execErr *exec.Error
+	if errors.As(err, &execErr) && execErr.Name == "dbus-launch" {
+		return ErrNoSecretStore
+	}
+	msg := err.Error()
+	switch {
+	case strings.Contains(msg, "couldn't determine address of session bus"):
+		return ErrNoSecretStore
+	case strings.Contains(msg, "failed to unlock correct collection"):
+		return ErrLocked
+	}
+	return nil
+}
+
+// dbusErrorName returns the D-Bus error name in err's chain, or "".
+// godbus returns dbus.Error both by value and by pointer.
+func dbusErrorName(err error) string {
+	var v dbus.Error
+	if errors.As(err, &v) {
+		return v.Name
+	}
+	var p *dbus.Error
+	if errors.As(err, &p) && p != nil {
+		return p.Name
+	}
+	return ""
 }

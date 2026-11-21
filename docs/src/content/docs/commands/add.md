@@ -4,7 +4,7 @@ description: Save a Supabase account under a name so you can switch to it later.
 lastUpdated: 2026-11-17
 ---
 
-Save a Supabase account under a name of your choice. The access token is stored in your OS secret vault; supawho never writes it to a file.
+Save a Supabase account under a name of your choice. The access token is stored in your OS secret vault; supawho never stores it in plain text.
 
 ## Synopsis
 
