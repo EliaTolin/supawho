@@ -57,18 +57,29 @@ One command to jump between projects and clients. 🔍
 
 ## ⚡ Quick start
 
+**1. Install** (details and other options in [Installation](#-installation)):
+
 ```bash
-# 1. Install (macOS shown — Linux & Windows below)
+# macOS
 brew install EliaTolin/tap/supawho
 
-# 2. Use it
+# Linux
+curl -fsSL https://raw.githubusercontent.com/EliaTolin/supawho/main/install.sh | bash
+```
+
+```powershell
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/EliaTolin/supawho/main/install.ps1 | iex
+```
+
+**2. Use it:**
+
+```bash
 supawho add          # save an account (once): asks for a name and the token, input hidden
 supawho use work     # switch to it in a second
 supawho whoami       # forgot which is which? map them all
 ```
 
-> Not on macOS? Grab your one-liner from [Installation](#-installation) — `install.sh` for Linux, `install.ps1` for Windows.
->
 > Full walkthrough: [Get started with supawho](https://supawho.dev/guides/getting-started/).
 
 <br>
@@ -102,6 +113,8 @@ Or grab the `Darwin` archive from the [releases page](https://github.com/EliaTol
 curl -fsSL https://raw.githubusercontent.com/EliaTolin/supawho/main/install.sh | bash
 ```
 
+> ℹ️ supawho stores tokens through the Secret Service (GNOME Keyring, KWallet, …), so it needs one running. Headless servers, SSH sessions and WSL usually don't have one: see [#36](https://github.com/EliaTolin/supawho/issues/36).
+
 <details>
 <summary>Native packages (<code>.deb</code> / <code>.rpm</code> / <code>.apk</code>)</summary>
 
@@ -119,8 +132,6 @@ sudo rpm -i supawho_*_linux_amd64.rpm
 # Alpine
 sudo apk add --allow-untrusted supawho_*_linux_amd64.apk
 ```
-
-> ℹ️ Linux needs a Secret Service provider (GNOME Keyring, KWallet, …) running to store tokens.
 
 </details>
 
