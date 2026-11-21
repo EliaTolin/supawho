@@ -27,6 +27,9 @@ func newHarness(input string) *harness {
 		In:      strings.NewReader(input),
 		Out:     h.out,
 		Version: "9.9.9",
+		// Fixed so OS-dependent messages don't change with the host running
+		// the tests; tests for other systems set it themselves.
+		GOOS: "darwin",
 	}
 	return h
 }
